@@ -29,3 +29,6 @@ USEAFTER_KEYWORDS = ("META.OBSERVATION.DATE", "META.OBSERVATION.TIME") # Dataset
 
 DEFAULT_SELECTORS = ("Match", "UseAfter")   # Normal selector hierarchy in rmap
 
+OMIT_NA_INSTRUMENTS = []
+
+

@@ -65,6 +65,8 @@ USEAFTER_KEYWORDS = ("DATE-OBS", "TIME-OBS")  # Dataset keywords matching in Use
 
 DEFAULT_SELECTORS = ("Match", "UseAfter")   # Normal selector hierarchy in rmap
 
+OMIT_NA_INSTRUMENTS = ["cos"]
+
 def test():
     """Run hst package doctests."""
     from crds import hst

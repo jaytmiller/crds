@@ -169,7 +169,7 @@ class HeaderGenerator(object):
                 log.verbose("-" * 120)
                 for update in sorted(updates):
                     new_ref = update.new_reference.upper()
-                    if new_ref != "N/A":
+                    if new_ref not in ['N/A','OMIT']:
                         new_ref = new_ref.lower()
                     self.headers[dataset][update.filekind.upper()] = new_ref
 
@@ -383,15 +383,23 @@ def update_file_bestrefs(context, dataset, updates):
             log.verbose("Setting", repr(dataset), keyword, "=", value)
             hdulist[0].header[keyword] = value
 
+        def del_key(keyword):
+            """Set a single keyword value with logging,  bound to outer-scope hdulist."""
+            log.verbose("Removing/omitting", repr(dataset), keyword)
+            hdulist[0].header.remove(keyword, ignore_missing=True)
+            
         set_key("CRDS_CTX", context)
         set_key("CRDS_VER", version_info)
 
         for update in sorted(updates):
             new_ref = update.new_reference.upper()
-            if new_ref != "N/A":
+            if new_ref not in ["N/A", "OMIT"]:
                 new_ref = (prefix + new_ref).lower()
             keyword = locator.filekind_to_keyword(update.filekind)
-            set_key(keyword, new_ref)
+            if new_ref == "OMIT":
+                del_key(keyword)
+            else:
+                set_key(keyword, new_ref)
 
         # This is a workaround for a bug in astropy.io.fits handling of 
         # FITS updates that are header-only and extend the header.

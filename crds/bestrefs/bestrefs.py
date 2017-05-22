@@ -1,7 +1,8 @@
 """This module is a command line script which handles comparing the best
 reference recommendations for a particular context and dataset files.
 
-For more details on the several modes of operations and command line parameters browse the source or run:   
+For more details on the several modes of operations and command line 
+parameters browse the source or run:   
 
 % python -m crds.bestrefs --help
 """
@@ -11,7 +12,7 @@ from __future__ import absolute_import
 
 import sys
 import os
-from collections import namedtuple, OrderedDict
+from collections import namedtuple, OrderedDict, defaultdict
 
 import crds
 from crds.core import log, config, utils, timestamp, cmdline, heavy_client
@@ -26,7 +27,8 @@ MAX_DATE = "9999-01-01 23:59:59"
 
 # ===================================================================
 
-UpdateTuple = namedtuple("UpdateTuple", ["instrument", "filekind", "old_reference", "new_reference"])
+UpdateTuple = namedtuple("UpdateTuple", 
+    ["instrument", "filekind", "old_reference", "new_reference"])
 
 # ============================================================================
 
@@ -41,7 +43,6 @@ def reformat_date_or_auto(date):
         return "auto"
     else:
         return timestamp.reformat_date(date)
-
 
 class BestrefsScript(cmdline.Script, cmdline.UniqueErrorsMixin):
     """Command line script for determining best references for a sequence of dataset files."""
@@ -70,7 +71,7 @@ are the 3 main use cases for crds.bestrefs:
   --update-headers to fill in dataset FITS headers with recommended best
   references. 
 
-    % python -m crds.bestrefs --files j8bt05njq_raw.fits j8bt06o6q_raw.fits j8bt09jcq_raw.fits... --update-headers
+    % crds bestrefs --files j8bt05njq_raw.fits j8bt06o6q_raw.fits j8bt09jcq_raw.fits... --update-headers
 
   The outcome of this command is updating the best references in the FITS
   headers of the specified .fits files.
@@ -83,7 +84,7 @@ are the 3 main use cases for crds.bestrefs:
   mode is used to recommend reprocessing where the bestrefs differ between old
   and new contexts.
 
-    % python -m crds.bestrefs --old-context hst_0001.pmap --new-context hst_0002.pmap --affected-datasets
+    % crds bestrefs --old-context hst_0001.pmap --new-context hst_0002.pmap --affected-datasets
 
   The outcome of this command is to print the IDs of datasets affected by the
   transition from context 0001 to 0002.
@@ -107,14 +108,14 @@ are the 3 main use cases for crds.bestrefs:
   This sub-mode captures all parameter sets for an instrument updated with the
   best refs assigned by --new-context.
 
-    %  python -m crds.bestrefs --new-context hst_0002.pmap --instrument acs --update-bestrefs --update-pickle --save-pickle old-regression.json
+    % crds bestrefs --new-context hst_0002.pmap --instrument acs --update-bestrefs --update-pickle --save-pickle old-regression.json
 
   b. Regression Test
 
   This sub-mode plays back captured datasets comparing captured prior results
   with the current result.
 
-    %  python -m crds.bestrefs --new-context hst_0002.pmap --compare-source-bestrefs --print-affected --load-pickles old-regression.json
+    % crds bestrefs --new-context hst_0002.pmap --compare-source-bestrefs --print-affected --load-pickles old-regression.json
 
   Unlike reprocessing mode, this mode necessarily runs against all the datasets
   specified by the data source,  in this case a .json parameters file.
@@ -190,7 +191,7 @@ If --print-affected is specified, crds.bestrefs will print out the name of any
 file for which at least one update for one reference type was recommended.
 This is essentially a list of files to be reprocessed with new references.
 
-    % python -m crds.bestrefs --new-context hst.pmap --files j8bt05njq_raw.fits j8bt06o6q_raw.fits j8bt09jcq_raw.fits \\
+    % crds bestrefs --new-context hst.pmap --files j8bt05njq_raw.fits j8bt06o6q_raw.fits j8bt09jcq_raw.fits \\
         --compare-source-bestrefs --print-affected
     j8bt05njq_raw.fits
     j8bt06o6q_raw.fits
@@ -203,7 +204,7 @@ Update Modes
 crds.bestrefs initially supports one mode for updating the best reference
 recommendations recorded in data files:
 
-    % python -m crds.bestrefs --new-context hst.pmap --files j8bt05njq_raw.fits j8bt06o6q_raw.fits j8bt09jcq_raw.fits \\
+    % crds bestrefs --new-context hst.pmap --files j8bt05njq_raw.fits j8bt06o6q_raw.fits j8bt09jcq_raw.fits \\
         --compare-source-bestrefs --update-bestrefs
 
 ......................
@@ -237,6 +238,7 @@ amount of informational and debug output.
     """
 
     def __init__(self, *args, **keys):
+        
         cmdline.Script.__init__(self, *args, **keys)
 
         # Placeholders until complex init is done.
@@ -421,6 +423,9 @@ amount of informational and debug output.
 
         self.add_argument("-i", "--instruments", nargs="+", metavar="INSTRUMENTS", default=None,
                           help="Instruments to compute best references for, all historical datasets in database.")
+
+        self.add_argument("--omit-na", nargs="+", metavar="INSTRUMENTS", default=None,
+                          help="Do not add bestref keyword for specified instruments when reference=N/A.")
 
         self.add_argument("-p", "--load-pickles", nargs="*", default=None,
                           help="Load dataset headers and prior bestrefs from pickle files,  in worst-to-best update order.  Can also load .json files.")
@@ -866,8 +871,12 @@ amount of informational and debug output.
             log.info("Header for", repr(dataset) + ":\n", log.PP(self.active_header))
 
     def post_processing(self):
-        """Given the computed update list, print out results,  update file headers, and fetch missing references."""
+        """Given the computed update list, print out results,  update file headers, 
+        and fetch missing references.
+        """
 
+        self.filter_omit_na()   # remove updates to N/A for specified instruments
+        
         if self.args.save_pickle:
             self.new_headers.save_pickle(self.args.save_pickle, only_ids=self.args.only_ids)
 
@@ -963,9 +972,42 @@ amount of informational and debug output.
         synced_references = {
             tup.new_reference.lower()
             for dataset in self.updates
-            for tup in self.updates[dataset] if tup.new_reference not in ["N/A"]
+            for tup in self.updates[dataset] if tup.new_reference not in ["N/A", "OMIT"]
         }
         api.dump_references(self.new_context, sorted(synced_references), raise_exceptions=self.args.pdb)
+
+    def filter_omit_na(self):
+        """Set update of N/A to OMIT for instruments mentioned by --omit-na
+        command line parameter or registered with the OMIT_NA_INSTRUMENTS
+        project specific list that defines defaults.
+        
+        Instruments mentioned in OMIT_NA_INSTRUMENTS default to OMIT.
+        Instruments not mentioned keep updates of N/A.
+        A mentioned instrument can be overridden by saying --omit-na OFF.
+        A not mentioned instrument can be set to OMIT using e.g. --omit-na ACS
+
+        Updates are retained in a revised updates list with some values of
+        N/A converted to OMIT;  they are not explicitly removed from the list.
+        """
+        if self.args.omit_na is None:
+            upper_instr = getattr(self.obs_pkg, "OMIT_NA_INSTRUMENTS", [])
+        else:
+            upper_instr = self.args.omit_na
+        upper_instr = [instr.upper() for instr in upper_instr]
+
+        new_updates = defaultdict(list)
+        for (dataset, updates) in self.updates.items():
+            for update in updates:
+                if (update.instrument.upper() not in upper_instr):
+                    new_updates[dataset].append(update)
+                elif update.new_reference != "N/A":
+                    new_updates[dataset].append(update)
+                else:
+                    omit_update = UpdateTuple(
+                        update.instrument, update.filekind, update.old_reference, "OMIT")
+                    new_updates[dataset].append(omit_update)
+                    
+        self.updates = new_updates
 
 # ============================================================================
 
