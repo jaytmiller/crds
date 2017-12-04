@@ -21,7 +21,7 @@ from astropy.io import fits
 
 import crds
 from crds.core import config, log, python23, rmap, heavy_client, cmdline
-from crds.core import crds_cache_locking
+from crds.core import crds_cache_locking, utils
 from crds import data_file
 
 from crds.client import api
@@ -324,11 +324,14 @@ and ids used for CRDS reprocessing recommendations.
             help="print the names of the parkeys required to compute bestrefs for the specified mappings.")
 
         self.add_argument("--required-reftypes", dest="required_reftypes", default=None,
-                          help="print reference type names nominally used to calibrate EXP_TYPE,CAL_VER under a given CRDS context. ,CAL_VER may be omitted.")
+            help="print reference type names nominally used to calibrate EXP_TYPE,CAL_VER under a given CRDS context. ,CAL_VER may be omitted.")
 
         self.add_argument("--required-pipelines", dest="required_pipelines", default=None,
-                          help="print CAL s/w pipeline .cfg names nominally used to calibrate EXP_TYPE,CAL_VER under a given CRDS context. ,CAL_VER may be omitted.")
+            help="print CAL s/w pipeline .cfg names nominally used to calibrate EXP_TYPE,CAL_VER under a given CRDS context. ,CAL_VER may be omitted.")
 
+        self.add_argument("--row-tables", dest="row_tables", action="store_true",
+            help="List the parameter combinations and files that are covered by the specified contexts.")
+                          
         super(ListScript, self).add_args()
         
     def main(self):
@@ -376,6 +379,9 @@ and ids used for CRDS reprocessing recommendations.
         if self.args.required_pipelines:
             self.list_required_pipelines()
 
+        if self.args.row_tables:
+            self.list_row_tables()
+            
     def list_resolved_contexts(self):
         """Print out the literal interpretation of the contexts implied by the script's
         context specifiers.
@@ -383,7 +389,14 @@ and ids used for CRDS reprocessing recommendations.
         self.show_context_resolution = True
         for context in self.contexts:
             print(context)
-
+    
+    def list_row_tables(self):
+        for context in self.contexts:
+            m = rmap.get_cached_mapping(context)
+            d = utils.Struct(m.todict())
+            for s in d.selections:
+                print(tuple(zip(d.parameters, s)))
+            
     @property
     def remote_context(self):
         """Print the name of the context in use at pipeline `self.args.remote_context`
