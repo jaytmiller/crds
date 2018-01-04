@@ -111,7 +111,11 @@ def header_to_reftypes(header, context=None):
 
     Return a list of reftype names.
     """
-    with log.warn_on_exception("Failed determining exp_type, cal_ver from header", log.PP(header)):
+    with log.warn_on_exception("Failed determining reftypes from header", log.PP(header)):
+        reftype = header.get("CRDSTYPE", None)
+        if reftype is not None:   # direct,  comma seperated type list
+            return reftype.lower().split(",")
+        # indirect, types largely determined by exp_type
         exp_type, cal_ver = _header_to_exptype_calver(header)
         return get_reftypes(exp_type, cal_ver, context)
     return []

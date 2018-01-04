@@ -73,6 +73,10 @@ def get_cross_strapped_pairs(header):
 
 def header_to_reftypes(header, context="hst-operational"):
     """Based on `header` return the default list of appropriate reference type names."""
+    with log.warn_on_exception("Failed determining reftypes from header", log.PP(header)):
+        reftype = header.get("CRDSTYPE", None)
+        if reftype is not None:   # direct, comma seperated type list
+            return reftype.lower().split(",")
     return []  # translates to everything.
 
 def get_reftypes(exp_type, cal_ver=None, context=None):
