@@ -22,6 +22,7 @@ from astropy.io import fits
 import crds
 from crds.core import config, log, python23, rmap, heavy_client, cmdline, utils
 from crds.core import crds_cache_locking
+from crds.certify import validators
 from crds import data_file
 
 from crds.client import api
@@ -372,12 +373,18 @@ jwst_niriss_superbias_0005.rmap
         self.add_argument("--collect-tpn-values", dest="collect_tpn_values", nargs="*", metavar="KEYWORD",
                           help="For each keyword,  print the union of all values accepted by some TpnInfo constraint.")
 
+        self.add_argument("--show-tpns", nargs="*", dest="show_tpns", metavar="FILES", default=None,
+            help="print the Tpn's associated with the processed files identified by context and --mappings or --references.")
+
         super(ListScript, self).add_args()
         
     def main(self):
         """List files."""
         if self.args.cat is not None: # including []
             return self.cat_files()
+
+        if self.args.show_tpns is not None:
+            return self.show_tpns()
 
         if self.args.operational_context:
             print(self.default_context)
@@ -454,22 +461,33 @@ jwst_niriss_superbias_0005.rmap
         # context specifiers can be symbolic and will be resolved.
         # --cat @file is allowed
 
-        mappings = self.get_context_mappings() if self.args.list_mappings else []
-        references = self.get_context_references() if self.args.list_references else []        
-        catted_files = self.get_words(self.args.cat) + mappings + references
-
+        mappings, references, files = self.get_implied_files(self.args.cat)
+        
         try:
             self._file_info = api.get_file_info_map(
-                self.observatory, files=[os.path.basename(filename) for filename in catted_files])
+                self.observatory, files=[os.path.basename(filename) for filename in files])
         except Exception:
             log.verbose_warning("Failed retrieving CRDS server catalog information.  May need to set CRDS_SERVER_URL.")
 
         # This could be expanded to include the closure of mappings or references
-        for name in catted_files:
+        for name in files:
             with log.error_on_exception("Failed dumping:", repr(name)):
                 path = self.locate_file(name) 
                 if path != "N/A":
                     self._cat_file(path)
+
+    def get_implied_files(self, explicit_files):
+        """Return the mappings and references and files identified by --contexts and --mappings
+        or --references or by the --cat parameter.
+
+        catted_files includes mappings, references, and --cat files.
+
+        Returns mappings, references, catted_files
+        """
+        mappings = self.get_context_mappings() if self.args.list_mappings else []
+        references = self.get_context_references() if self.args.list_references else []
+        files = self.get_words(explicit_files) + mappings + references
+        return mappings, references, files
                     
     def _cat_file(self, path):
         """Print out information on a single reference or mapping at `path`."""
@@ -745,6 +763,16 @@ jwst_niriss_superbias_0005.rmap
         for name in self.args.collect_tpn_values:
             values = self.locator.collect_tpn_values(name)
             print(name, ":" , values)
+
+    def show_tpns(self):
+        mappings, references, files = self.get_implied_files(self.args.show_tpns)
+        for file_ in files:
+            self.show_file_tpns(file_, file_ + " :" if len(files) != 1 else "")
+
+    def show_file_tpns(self, file_, prefix):
+        infos = validators.get_reffile_tpninfos(self.observatory, file_)
+        for info in sorted(infos):
+            print(prefix, repr(info))
 
 def _get_python_info():
     """Collect and return information about the Python environment"""
