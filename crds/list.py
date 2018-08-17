@@ -376,6 +376,12 @@ jwst_niriss_superbias_0005.rmap
         self.add_argument("--show-tpns", nargs="*", dest="show_tpns", metavar="FILES", default=None,
             help="print the Tpn's associated with the processed files identified by context and --mappings or --references.")
 
+        self.add_argument("--tpninfos", dest="tpninfos", nargs="*", metavar="KEYWORD", default=None,
+                          help="print the constraint objects CRDS applies to the specified keyword or it's datamodel equivalent.")
+
+        self.add_argument("--collect-tpn-values", dest="collect_tpn_values", nargs="*", metavar="KEYWORD",
+                          help="For each keyword,  print the union of all values accepted by some TpnInfo constraint.")
+
         super(ListScript, self).add_args()
         
     def main(self):
@@ -425,6 +431,12 @@ jwst_niriss_superbias_0005.rmap
 
         if self.args.required_pipelines:
             self.list_required_pipelines()
+
+        if self.args.tpninfos is not None:
+            self.list_tpninfos()
+
+        if self.args.collect_tpn_values:
+            self.collect_tpn_values()
 
         if self.args.tpninfos is not None:
             self.list_tpninfos()
@@ -773,6 +785,7 @@ jwst_niriss_superbias_0005.rmap
         infos = validators.get_reffile_tpninfos(self.observatory, file_)
         for info in sorted(infos):
             print(prefix, repr(info))
+
 
 def _get_python_info():
     """Collect and return information about the Python environment"""
