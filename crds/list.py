@@ -367,12 +367,6 @@ jwst_niriss_superbias_0005.rmap
         self.add_argument("--required-pipelines", dest="required_pipelines", default=None,
                           help="print CAL s/w pipeline .cfg names nominally used to calibrate EXP_TYPE,CAL_VER under a given CRDS context. ,CAL_VER may be omitted.")
 
-        self.add_argument("--tpninfos", dest="tpninfos", nargs="*", metavar="KEYWORD", default=None,
-                          help="print the constraint objects CRDS applies to the specified keyword or it's datamodel equivalent.")
-
-        self.add_argument("--collect-tpn-values", dest="collect_tpn_values", nargs="*", metavar="KEYWORD",
-                          help="For each keyword,  print the union of all values accepted by some TpnInfo constraint.")
-
         self.add_argument("--show-tpns", nargs="*", dest="show_tpns", metavar="FILES", default=None,
             help="print the Tpn's associated with the processed files identified by context and --mappings or --references.")
 
