@@ -69,6 +69,9 @@ def get_cross_strapped_pairs(header):
     """
     return  get_static_pairs()
 
+def get_fits_datamodel_pairs(header):
+    return [(key, key) for key in header]
+
 # =======================================================================
 
 def header_to_reftypes(header, context="hst-operational"):

@@ -507,12 +507,14 @@ def get_cross_strapped_pairs(header):
     """Return the list of keyword pairs where each pair describes synonyms for the same
     piece of data.
     """
-    return  get_static_pairs() + _get_fits_datamodel_pairs(header)
+    return  get_static_pairs() + get_fits_datamodel_pairs(header)
 
-def _get_fits_datamodel_pairs(header):
+def get_fits_datamodel_pairs(header):
     """Return the (FITS, DM) and (DM, FITS) cross strap pairs associated with
     every keyword in `header` as defined by the datamodels interface functions
-    defined by the CRDS JWST schema module.
+    defined by the CRDS JWST schema module. `header` may also be a keyword list.
+    
+    Returns [(fits,dm),(dm,fits), ...]
     """
     pairs = []
     from . import schema
