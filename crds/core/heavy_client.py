@@ -460,11 +460,8 @@ def translate_date_based_context(context, observatory=None):
 
     if not info.connected:
         raise CrdsError("Specified CRDS context by date '{}' and CRDS server is not reachable.".format(context))
-    try:
+    with log.augment_exception("Failed to translate date based context", repr(context)):
         translated = api.get_context_by_date(context, observatory=info.observatory)
-    except Exception as exc:
-        log.error("Failed to translate date based context", repr(context), ":", str(exc))
-        raise
 
     log.verbose("Date based context spec", repr(context), "translates to", repr(translated) + ".", verbosity=80)
     return translated

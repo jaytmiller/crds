@@ -64,6 +64,9 @@ def get_cross_strapped_pairs(header):
     """
     return  get_static_pairs()
 
+def get_fits_datamodel_pairs(header):
+    return [(key, key) for key in header]
+
 # =======================================================================
 
 REF_EXT_RE = re.compile(r"\.fits|\.r\dh$")

@@ -687,9 +687,11 @@ class ContextsScript(Script):
                 _contexts2.extend(expand_all_instruments(self.observatory, ctx))
             contexts = []
             for ctx in _contexts2:
-                resolved = self.resolve_context(ctx)
-                if resolved != 'N/A':
-                    contexts.append(resolved)
+                with log.verbose_warning_on_exception(
+                        "Failed to resolve context", repr(ctx)):
+                    resolved = self.resolve_context(ctx)
+                    if resolved != 'N/A':
+                        contexts.append(resolved)
         elif self.args.all:
             contexts = self._list_mappings("*.pmap")
         elif self.args.last_n_contexts:
