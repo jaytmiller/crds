@@ -63,6 +63,7 @@ REMAPPED_MODULES = {
     "newcontext" : "crds.refactoring.newcontext",
     "checksum" : "crds.refactoring.checksum",
     "rstinfo" : "crds.rst.info",
+    "rst_to_html" : "crds.rst.to_html",
 }
 
 remapped = REMAPPED_MODULES.get(sys.argv[1], "crds." + sys.argv[1])
