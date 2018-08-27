@@ -245,6 +245,15 @@ class Script(object):
 
         return api.get_default_observatory()
 
+    def get_symbolic_mapping(self, mapping_name):
+        """Load a mapping object from symbolic mapping `mapping_name` defining
+        `observatory as self.observatory.
+
+        Returns a loaded mapping
+        """
+        return heavy_client.get_symbolic_mapping(
+            mapping_name, observatory=self.observatory)
+
     def set_server(self, observatory):
         """Based on `observatory`,  set the CRDS server to an appropriate default,  particularly
         for the case where CRDS_SERVER_URL is not set.
