@@ -152,14 +152,14 @@ class FitsFile(AbstractFile):
                 "BINTABLEHDU" : "TABLE", 
             }.get(hdu.__class__.__name__.upper(), "UNKNOWN")
             if generic_class in ["IMAGE","UNKNOWN"]:
-                typespec = hdu.data.dtype.name
+                typespec = 'NONE' if hdu.data is None else hdu.data.dtype.name
                 column_names = None
             else: # TABLE
                 dtype = hdu.data.dtype
                 typespec = {name.upper():str(dtype.fields[name][0]) for name in dtype.names}
                 column_names = [name.upper() for name in hdu.data.dtype.names]
             return utils.Struct( 
-                        SHAPE = hdu.data.shape,
+                        SHAPE = 'NONE' if hdu.data is None else hdu.data.shape,
                         KIND = generic_class,
                         DATA_TYPE = typespec,
                         COLUMN_NAMES = column_names,
