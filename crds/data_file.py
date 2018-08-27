@@ -117,9 +117,13 @@ def verify_checksum(filepath):
 
 # ================================================================================================================
 
+def get_array_names(filename):
+    """Return a list of the names of arrays in `filename`."""
+    file_obj = file_factory(filename)
+    return file_obj.get_array_names()
+
 def get_array_properties(filename, array_name, keytype="A"):
     """Return the dictionary defining basic properties of `array_name` of `filename`.
-    
     Keytype == "A" for "array" means lightweight format only checks with no data included.
     Keytype == "D" for "data" means heavy data oriented checks with data arrays returned as well.
     """
