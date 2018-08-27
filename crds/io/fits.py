@@ -103,6 +103,12 @@ class FitsFile(AbstractFile):
                     union.append((key, value))
         return union
 
+    def get_array_names(self):
+        """Return a list of the names of the arrays in self.filename."""
+        with fits_open(self.filepath) as hdulist:
+            return [hdu.name + "__" + str(hdu.ver)
+                    for hdu in hdulist]
+
     def get_array_properties(self, array_name, keytype="A"):
         """Return a Struct defining the properties of the FITS array in extension named `array_name`."""
         with fits_open(self.filepath) as hdulist:

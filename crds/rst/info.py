@@ -3,10 +3,12 @@ mapping files associated with the specified contexts by consulting the CRDS
 server.   More generally it's for printing out information on CRDS files.
 """
 import sys
+import os.path
 
 # ============================================================================
 
 from crds.core import cmdline
+from crds import data_file
 
 from . import rstutils
 
@@ -77,6 +79,12 @@ class RstInfoScript(cmdline.ContextsScript):
         self.add_argument(
             '--datamodels-translations', action="store_true",
             help='Print out FITS to datamodels translations.')
+        self.add_argument(
+            '--array-names', action="store_true",
+            help='Print out names of arrays contained by the specified reference files.')
+        self.add_argument(
+            '--files', nargs="*", default=[],
+            help='Print out names of arrays contained by the specified reference files.')
         super(RstInfoScript, self).add_args()
         
     def main(self):
@@ -88,6 +96,20 @@ class RstInfoScript(cmdline.ContextsScript):
         if self.args.datamodels_translations:
             print(self.format_datamodels_translations())
 
+        if self.args.array_names:
+            self.print_array_names()
+
+    def print_array_names(self):
+        """Print out the array names associated with the references from
+        the specified contexts or --files.
+        """
+        references = self.get_context_references() + self.files
+        for reffile in references:
+            refpath = self.locate_file(reffile)
+            for array in data_file.get_array_names(refpath):
+                print(os.path.basename(reffile)+":", array)
+                # properties = data_file.get_array_properties(refpath, array)
+            
     def format_datamodels_translations(self):
         """Return FITS to datamodels translations as a RST table."""
         title = "FITS to Data Models Translations"

@@ -45,7 +45,7 @@ def hijack_warnings(func):
             warnings.showwarning = hijacked_showwarning
             warnings.simplefilter("always", AstropyUserWarning)
             try:
-                from jwst.datamodels.util import ValidationWarning
+                from jwst.datamodels.validate import ValidationWarning
             except:
                 pass
             else:
@@ -238,6 +238,10 @@ class AbstractFile(object):
         for file overview describing generic array structure.
         """
         raise self._unsupported_file_op_error("get_format")
+
+    def get_array_names(self):
+        """Return a list of the names of arrays in self.filename"""
+        raise self._unsupported_file_op_error("get_array_names")
 
     def get_array_properties(self, array_name, keytype="A"):
         """Return a basic properties dictionary for array named `array_name`."""
