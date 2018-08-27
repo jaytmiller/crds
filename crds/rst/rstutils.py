@@ -17,9 +17,11 @@ class CrdsTableRow(tuple):
     def resolve(self):
         resolved = []
         for field in self:
-            field = re.sub("\s+", " ", field)
             if isinstance(field, str):
+                field = re.sub("\s+", " ", field)
                 resolved.append(field)
+            elif isinstance(field, (list,tuple,dict,int,float,complex,bool)):
+                resolved.append(str(field))
             else:
                 resolved.append(field())
         return tuple(resolved)

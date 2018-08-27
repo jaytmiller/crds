@@ -83,6 +83,9 @@ class RstInfoScript(cmdline.ContextsScript):
             '--array-names', action="store_true",
             help='Print out names of arrays contained by the specified reference files.')
         self.add_argument(
+            '--array-formats', action="store_true",
+            help='Print array formats as .rst for references associated with contexts or --files.')
+        self.add_argument(
             '--files', nargs="*", default=[],
             help='Print out names of arrays contained by the specified reference files.')
         super(RstInfoScript, self).add_args()
@@ -99,6 +102,32 @@ class RstInfoScript(cmdline.ContextsScript):
         if self.args.array_names:
             self.print_array_names()
 
+        if self.args.array_formats:
+            for refrst in self.array_formats():
+                print(refrst)
+
+    def array_formats(self):
+        references = self.files or self.get_context_references()
+        rst = ""
+        for reffile in references:
+            refpath = self.locate_file(reffile)
+            yield self.reference_formats(refpath)
+    
+    def reference_formats(self, refpath):
+        title = "Array Formats for " + repr(os.path.basename(refpath))
+        colnames = ("Array Name", "Kind", "Shape", "Data Type")
+        rows = self.get_array_formats(refpath)
+        table = rstutils.CrdsTable(title, colnames, rows)
+        return table.to_rst()
+
+    def get_array_formats(self, refpath):
+        formats = []
+        for array_name in data_file.get_array_names(refpath):
+            props = data_file.get_array_properties(refpath, array_name, "D")
+            formats.append(
+                (array_name, props["KIND"], props["SHAPE"], props["DATA_TYPE"]))
+        return formats[1:]
+    
     def print_array_names(self):
         """Print out the array names associated with the references from
         the specified contexts or --files.
