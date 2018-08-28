@@ -364,7 +364,7 @@ def fits_to_parkeys(fits_header):
     for key, value in fits_header.items():
         key, value = str(key), str(value)
         if not key.lower().startswith("meta."):
-            pk = cached_dm_find_fits_keyword(key)
+            pk = cached_fits_to_dm(key)
             if not pk:
                 pk = key
             else:
@@ -377,12 +377,18 @@ def fits_to_parkeys(fits_header):
         parkeys[pk] = value
     return parkeys
 
+
+
 @utils.cached
-def cached_dm_find_fits_keyword(key):
-    """Return the SSB JWST data model path for the specified non-path keyword,  nominally
-    a FITS or json or ASDF bare keyword.
-    """
-    return MODEL.find_fits_keyword(key.upper(), return_result=True)
+def cached_fits_to_dm(fitskey):
+    """Given `fitskey` returns corresponding datamodels path."""
+    return schema.fits_to_dm(fitskey.upper()) or fitskey
+
+@utils.cached
+def cached_dm_to_fits(dmkey):
+    """Given datamodels path `dmkey`,  returns corresponding FITS keyword."""
+    return schema.dm_to_fits(dmkey) or dmkey
+
 # ============================================================================
 
 def get_env_prefix(instrument):
