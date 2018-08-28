@@ -4,11 +4,14 @@ server.   More generally it's for printing out information on CRDS files.
 """
 import sys
 import os.path
+import re
+import pprint
 
 # ============================================================================
 
 from crds.core import cmdline
 from crds import data_file
+from crds import matches
 
 from . import rstutils
 
@@ -114,19 +117,45 @@ class RstInfoScript(cmdline.ContextsScript):
             yield self.reference_formats(refpath)
     
     def reference_formats(self, refpath):
-        title = "Array Formats for " + repr(os.path.basename(refpath))
+        # title = "Array Formats for " + repr(os.path.basename(refpath))
+        title = "Array Formats for " + self.characterize_refpath(refpath)
         colnames = ("Array Name", "Kind", "Shape", "Data Type")
         rows = self.get_array_formats(refpath)
         table = rstutils.CrdsTable(title, colnames, rows)
         return table.to_rst()
 
+    def characterize_refpath(self, refpath):
+        ref = os.path.basename(refpath)
+        lookups = matches.find_full_match_paths(self.default_context, ref)
+        lookup = lookups[0][1]
+        lookup = [(self.locator.cached_dm_to_fits(par[0]),repr(par[1]))
+                   for par in lookup ]
+        selection = " ".join("=".join(par) for par in lookup)
+        date_time = "USEAFTER=" + repr(lookups[0][2][0][1])
+        return repr(ref) + " : " + selection + " " + date_time
+
     def get_array_formats(self, refpath):
         formats = []
         for array_name in data_file.get_array_names(refpath):
-            props = data_file.get_array_properties(refpath, array_name, "D")
-            formats.append(
-                (array_name, props["KIND"], props["SHAPE"], props["DATA_TYPE"]))
-        return formats[1:]
+            props = data_file.get_array_properties(refpath, array_name, "A")
+            row = self.massage_array_props(array_name, props)
+            formats.append(row)
+        return formats[1:]  # skip PRIMARY HDU
+
+    def massage_array_props(self, array_name, props):
+        """Given the `array_name` and it's corresponding properties
+        dictionary `props`, massage the field strings for readability
+        in the .rst or HTML output table.
+        return (array_name, kind, shape, data_type)
+        """
+        kind, shape, column_names, data_type = \
+            props["KIND"], props["SHAPE"], props["COLUMN_NAMES"], \
+            props["DATA_TYPE"]
+        shape = str(shape).replace(" ","")
+        if re.match(r"^.*__\d+$", array_name):
+            name, ver = array_name.split("__")
+            array_name = f"({name},{ver})"
+        return (array_name, kind, shape, data_type)
     
     def print_array_names(self):
         """Print out the array names associated with the references from
@@ -210,6 +239,48 @@ class RstInfoScript(cmdline.ContextsScript):
         return [(pair[0],pair[1].lower()) for pair in pairs
                 if (not pair[0].startswith("META.") and
                     pair[1].startswith("META."))]
-        
+
+#         print((array_name, kind, shape, column_names, data_type))
+#         if kind == "TABLE":
+#             data_type = dict(data_type)
+#             for colname in column_names:
+#                 data_type[colname] = self.simplify_col_format(data_type[colname])
+#         return (array_name, kind, shape, data_type)
+
+# #    def simplify_col_format(self, coltype):
+# #        return re.sub(r"[\"\']([^ ]+[\',",
+
+# # ============================================================================
+
+# def simplify_type(raw_match):
+#     label = raw_match.group(1)
+#     repeat = raw_match.group(2)
+#     atype = raw_match.group(3)
+#     digits = raw_match.group(4)
+#     trail = raw_match.group(5)
+#     pprint.pprint((label, repeat, atype, digits, trail))
+#     long_atype = {
+#         "b" : "bytes",
+#         "i" : "int",
+#         "u" : "uint",
+#         "f" : "float",
+#         "c" : "complex",
+#         "S" : "string",
+#     }[atype]
+#     if repeat == None:
+#         repeat = ""
+#     else:
+#         repeat = f"[{repeat}]"
+#     if long_atype != "string":
+#         bits = str(2**int(digits))
+#     else:
+#         bits = str(digits) # actually bytes
+#     field = label + long_atype + bits + repeat
+#     if field.endswith(tuple("0123456789")):
+#         field = field + ", "
+#     return field
+
+# ============================================================================
+
 if __name__ == "__main__":
     sys.exit(RstInfoScript()())
