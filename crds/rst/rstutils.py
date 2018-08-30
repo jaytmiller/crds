@@ -46,7 +46,7 @@ class CrdsTable(object):
     =========== =============
     <BLANKLINE>
     """
-    def __init__(self, title, name_row, data_rows, format=("=","-")):
+    def __init__(self, title, name_row, data_rows, format=("-","=")):
         self.title = title
         self.rows = []
         self._format = format
