@@ -29,7 +29,7 @@ class RstInfoScript(cmdline.ContextsScript):
     epilog = """
     1. Generate table of matching criteria:
 
-    $ crds rstinfo --matching-criteria --contexts jwst-all-wfssbkg-edit
+    $ crds rstinfo --selection-criteria --contexts jwst-all-wfssbkg-edit
     Reference Selection Keywords for WFSSBKG
     ========================================
     ---------- ---------------------------------------------------------------
@@ -76,7 +76,7 @@ class RstInfoScript(cmdline.ContextsScript):
     def add_args(self):
         """Add switches unique to RstInfoScript."""
         self.add_argument(
-            '--matching-criteria', action="store_true",
+            '--selection-criteria', action="store_true",
             help=('Print out the matching criteria associated with'
                   ' the specified contexts.'))
         self.add_argument(
@@ -96,8 +96,8 @@ class RstInfoScript(cmdline.ContextsScript):
     def main(self):
         """Generate .rst as requested by parameters."""
 
-        if self.args.matching_criteria:
-            print(self.format_matching_criteria())
+        if self.args.selection_criteria:
+            print(self.format_selection_criteria())
 
         if self.args.datamodels_translations:
             print(self.format_datamodels_translations())
@@ -166,7 +166,6 @@ class RstInfoScript(cmdline.ContextsScript):
             refpath = self.locate_file(reffile)
             for array in data_file.get_array_names(refpath):
                 print(os.path.basename(reffile)+":", array)
-                # properties = data_file.get_array_properties(refpath, array)
             
     def format_datamodels_translations(self):
         """Return FITS to datamodels translations as a RST table."""
@@ -176,15 +175,16 @@ class RstInfoScript(cmdline.ContextsScript):
         table = rstutils.CrdsTable(title, colnames, translations)
         return table.to_rst()
         
-    def format_matching_criteria(self):
+    def format_selection_criteria(self):
         """Return matching criteria associated with the specified contexts
         as a RST table.
         """
-        title, colnames, data = self.get_matching_criteria()
-        table = rstutils.CrdsTable(title, colnames, data)
+        title, description, colnames, data = self.get_selection_criteria()
+        table = rstutils.CrdsTable(title, colnames, data,
+                                   description=description)
         return table.to_rst()
 
-    def get_matching_criteria(self):
+    def get_selection_criteria(self):
         """Return a section title str, list of column names, and table rows
         defining the matching criteria associated with self.contexts.
         """
@@ -200,8 +200,10 @@ class RstInfoScript(cmdline.ContextsScript):
             required = repr(required)[1:-1].replace("'","")  # drop [,],'
             criteria = (loaded.instrument.upper(),required)
             rows += [criteria]
-        title = f"Reference Selection Keywords for {loaded.filekind.upper()}"
-        return title, colnames, rows
+        reftype = loaded.filekind.upper()
+        title = f"Reference Selection Keywords for {reftype}"
+        description = f"CRDS selects appropriate {reftype} references based on the following keywords.\n{reftype} is not applicable for instruments not in the table.\n"
+        return title, description, colnames, rows
 
     def get_fits_translations(self):
         """Returns a sorted list of the form:

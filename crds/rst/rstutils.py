@@ -46,8 +46,10 @@ class CrdsTable(object):
     =========== =============
     <BLANKLINE>
     """
-    def __init__(self, title, name_row, data_rows, format=("-","=")):
+    def __init__(self, title, name_row, data_rows, format=("-","="),
+                 description=None):
         self.title = title
+        self.description = description
         self.rows = []
         self._format = format
         self._name_row = CrdsTableRow(name_row)
@@ -60,6 +62,8 @@ class CrdsTable(object):
         rst = ""
         if self.title:
             rst += self.title + "\n" + self._format[0]*len(self.title) + "\n"
+        if self.description:
+            rst += self.description + "\n"
         rst += self.table_to_rst()
         return rst
 
