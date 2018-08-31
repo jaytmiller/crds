@@ -14,6 +14,7 @@ setup_pars = {
         'crds.client',
         'crds.core',
         'crds.io',
+        'crds.rst',
         'crds.submit',
 
         'crds.misc',
@@ -32,6 +33,7 @@ setup_pars = {
         'crds.client' : 'crds/client',
         'crds.core' : 'crds/core',
         'crds.io' : 'crds/io',
+        'crds.rst' : 'crds/rst',
         'crds.submit' : 'crds/submit',
 
         'crds.misc' : 'crds/misc',

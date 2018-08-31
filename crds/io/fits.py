@@ -83,7 +83,7 @@ class FitsFile(AbstractFile):
         info_string = "\n".join(s.read().splitlines()[1:])
         return info_string
 
-    def _array_name_to_hdu_index(self, array_name):
+    def _array_name_to_hdu_index(self, array_name,**keys):
         array_name = str(array_name)
         ext_match = re.match(r"(EXT(ENSION)?)?(\d+)", array_name)
         if ext_match:
@@ -95,8 +95,8 @@ class FitsFile(AbstractFile):
             return (name, ver), self._extension_number((name, ver))
         return array_name, self._extension_number(array_name)
 
-    def _extension_number(self, index):
-        with fits_open(self.filepath) as hdus:
+    def _extension_number(self, index, **keys):
+        with fits_open(self.filepath, **keys) as hdus:
             for i, hdu in enumerate(hdus):
                 if isinstance(index, str):
                     if hdu.name == index:
@@ -109,12 +109,12 @@ class FitsFile(AbstractFile):
                         "Unrecognized HDU index format: " + str(index))
             raise ValueError("Can't find HDU: " + str(index))
 
-    def get_array(self, array_name):
+    def get_array(self, array_name, **keys):
         """Return the `name`d array data from `filepath`,  alternately indexed
         by `extension` number.
         """
         index = self._array_name_to_hdu_index(array_name)
-        with fits_open(self.filepath) as hdus:
+        with fits_open(self.filepath, **keys) as hdus:
             return hdus[index[1]].data
 
     def get_raw_header(self, needed_keys=(), **keys):
@@ -133,15 +133,15 @@ class FitsFile(AbstractFile):
                     union.append((key, value))
         return union
 
-    def get_array_names(self):
+    def get_array_names(self, **keys):
         """Return a list of the names of the arrays in self.filename."""
-        with fits_open(self.filepath) as hdulist:
+        with fits_open(self.filepath, **keys) as hdulist:
             return [hdu.name + "__" + str(hdu.ver)
                     for hdu in hdulist]
 
-    def get_array_properties(self, array_name, keytype="A"):
+    def get_array_properties(self, array_name, keytype="A", **keys):
         """Return a Struct defining the properties of the FITS array in extension named `array_name`."""
-        with fits_open(self.filepath) as hdulist:
+        with fits_open(self.filepath, **keys) as hdulist:
             try:
                 array_name = self._array_name_to_hdu_index(array_name)
                 hdu = hdulist[array_name[1]]
