@@ -126,12 +126,10 @@ def _x_schema_to_flat(schema):
         if feature in schema:
             log.verbose_warning("Schema item has unhandled feature {}.", verbosity=80)
             return None
-        
-    if "anyOf" in schema and "type" in schema["anyOf"]:
-        schema_type = schema["anyOf"]["type"]
-    else:
-        schema_type = schema.get("type", "null")
-        
+    try:
+        schema_type = schema["anyOf"][1]["type"]
+    except Exception:
+        schema_type = schema.get("type", "null")    
     if schema_type ==  "object":
         subprops = schema["properties"]
         for prop in subprops:

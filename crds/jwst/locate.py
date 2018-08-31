@@ -364,7 +364,7 @@ def fits_to_parkeys(fits_header):
     for key, value in fits_header.items():
         key, value = str(key), str(value)
         if not key.lower().startswith("meta."):
-            pk = cached_fits_to_dm(key)
+            pk = fits_to_dm(key)
             if not pk:
                 pk = key
             else:
@@ -379,15 +379,13 @@ def fits_to_parkeys(fits_header):
 
 
 
-@utils.cached
-def cached_fits_to_dm(fitskey):
+def fits_to_dm(fitskey):
     """Given `fitskey` returns corresponding datamodels path."""
     return schema.fits_to_dm(fitskey.upper()) or fitskey
 
-@utils.cached
-def cached_dm_to_fits(dmkey):
+def dm_to_fits(dmkey):
     """Given datamodels path `dmkey`,  returns corresponding FITS keyword."""
-    return schema.dm_to_fits(dmkey) or dmkey
+    return schema.dm_to_fits(dmkey.upper()) or dmkey
 
 # ============================================================================
 

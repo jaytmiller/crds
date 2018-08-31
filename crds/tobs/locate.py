@@ -303,13 +303,11 @@ def fits_to_parkeys(header):
     """Map a FITS header onto rmap parkeys appropriate for this observatory."""
     return dict(header)
 
-@utils.cached
-def cached_fits_to_dm(fitskey):
+def fits_to_dm(fitskey):
     """Given `fitskey` returns corresponding datamodels path."""
     return fitskey  # XXXX no HST datamodels, see JWST
 
-@utils.cached
-def cached_dm_to_fits(dmkey):
+def dm_to_fits(dmkey):
     """Given datamodels path `dmkey`,  returns corresponding FITS keyword."""
     return dmkey  # XXXX no HST datamodels, see JWST
 

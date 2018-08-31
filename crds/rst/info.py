@@ -128,7 +128,7 @@ class RstInfoScript(cmdline.ContextsScript):
         ref = os.path.basename(refpath)
         lookups = matches.find_full_match_paths(self.default_context, ref)
         lookup = lookups[0][1]
-        lookup = [(self.locator.cached_dm_to_fits(par[0]),repr(par[1]))
+        lookup = [(self.locator.dm_to_fits(par[0]),repr(par[1]))
                    for par in lookup ]
         selection = " ".join("=".join(par) for par in lookup)
         date_time = "USEAFTER=" + repr(lookups[0][2][0][1])
@@ -223,22 +223,18 @@ class RstInfoScript(cmdline.ContextsScript):
                 keywords |= set(reqs)
         return sorted(list(keywords))
                                                
-    
     def to_fits_names(self, keywords):
         """Given a list of datamodels names,  return a list of
         the corresponding FITS keywords.
         """
-        pairs = self.to_fits_datamodels(keywords)
-        return [pair[0] for pair in pairs]
-    
+        return [self.locator.dm_to_fits(key) for key in keywords]
+        
     def to_fits_datamodels(self, keywords):
         """Returns [(FITS name, datamodels name), ...] associated with
         list of `keywords` names.
         """
-        pairs = self.locator.get_fits_datamodel_pairs(keywords)
-        return [(pair[0],pair[1].lower()) for pair in pairs
-                if (not pair[0].startswith("META.") and
-                    pair[1].startswith("META."))]
+        return zip([self.locator.dm_to_fits(key) for key in keywords],
+                   [self.locator.fits_to_dm(key) for key in keywords])
 
 #         print((array_name, kind, shape, column_names, data_type))
 #         if kind == "TABLE":
