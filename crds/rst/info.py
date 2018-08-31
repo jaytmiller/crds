@@ -76,7 +76,11 @@ class RstInfoScript(cmdline.ContextsScript):
     def add_args(self):
         """Add switches unique to RstInfoScript."""
         self.add_argument(
+<<<<<<< HEAD
             '--selection-criteria', action="store_true",
+=======
+            '--matching-criteria', action="store_true",
+>>>>>>> 28f504fa452f7cb1dcf18979583f9828c85c0e30
             help=('Print out the matching criteria associated with'
                   ' the specified contexts.'))
         self.add_argument(
@@ -96,8 +100,13 @@ class RstInfoScript(cmdline.ContextsScript):
     def main(self):
         """Generate .rst as requested by parameters."""
 
+<<<<<<< HEAD
         if self.args.selection_criteria:
             print(self.format_selection_criteria())
+=======
+        if self.args.matching_criteria:
+            print(self.format_matching_criteria())
+>>>>>>> 28f504fa452f7cb1dcf18979583f9828c85c0e30
 
         if self.args.datamodels_translations:
             print(self.format_datamodels_translations())
@@ -128,7 +137,11 @@ class RstInfoScript(cmdline.ContextsScript):
         ref = os.path.basename(refpath)
         lookups = matches.find_full_match_paths(self.default_context, ref)
         lookup = lookups[0][1]
+<<<<<<< HEAD
         lookup = [(self.locator.dm_to_fits(par[0]),repr(par[1]))
+=======
+        lookup = [(self.locator.cached_dm_to_fits(par[0]),repr(par[1]))
+>>>>>>> 28f504fa452f7cb1dcf18979583f9828c85c0e30
                    for par in lookup ]
         selection = " ".join("=".join(par) for par in lookup)
         date_time = "USEAFTER=" + repr(lookups[0][2][0][1])
@@ -166,6 +179,10 @@ class RstInfoScript(cmdline.ContextsScript):
             refpath = self.locate_file(reffile)
             for array in data_file.get_array_names(refpath):
                 print(os.path.basename(reffile)+":", array)
+<<<<<<< HEAD
+=======
+                # properties = data_file.get_array_properties(refpath, array)
+>>>>>>> 28f504fa452f7cb1dcf18979583f9828c85c0e30
             
     def format_datamodels_translations(self):
         """Return FITS to datamodels translations as a RST table."""
@@ -175,6 +192,7 @@ class RstInfoScript(cmdline.ContextsScript):
         table = rstutils.CrdsTable(title, colnames, translations)
         return table.to_rst()
         
+<<<<<<< HEAD
     def format_selection_criteria(self):
         """Return matching criteria associated with the specified contexts
         as a RST table.
@@ -185,6 +203,17 @@ class RstInfoScript(cmdline.ContextsScript):
         return table.to_rst()
 
     def get_selection_criteria(self):
+=======
+    def format_matching_criteria(self):
+        """Return matching criteria associated with the specified contexts
+        as a RST table.
+        """
+        title, colnames, data = self.get_matching_criteria()
+        table = rstutils.CrdsTable(title, colnames, data)
+        return table.to_rst()
+
+    def get_matching_criteria(self):
+>>>>>>> 28f504fa452f7cb1dcf18979583f9828c85c0e30
         """Return a section title str, list of column names, and table rows
         defining the matching criteria associated with self.contexts.
         """
@@ -200,10 +229,15 @@ class RstInfoScript(cmdline.ContextsScript):
             required = repr(required)[1:-1].replace("'","")  # drop [,],'
             criteria = (loaded.instrument.upper(),required)
             rows += [criteria]
+<<<<<<< HEAD
         reftype = loaded.filekind.upper()
         title = f"Reference Selection Keywords for {reftype}"
         description = f"CRDS selects appropriate {reftype} references based on the following keywords.\n{reftype} is not applicable for instruments not in the table.\n"
         return title, description, colnames, rows
+=======
+        title = f"Reference Selection Keywords for {loaded.filekind.upper()}"
+        return title, colnames, rows
+>>>>>>> 28f504fa452f7cb1dcf18979583f9828c85c0e30
 
     def get_fits_translations(self):
         """Returns a sorted list of the form:
@@ -225,18 +259,35 @@ class RstInfoScript(cmdline.ContextsScript):
                 keywords |= set(reqs)
         return sorted(list(keywords))
                                                
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 28f504fa452f7cb1dcf18979583f9828c85c0e30
     def to_fits_names(self, keywords):
         """Given a list of datamodels names,  return a list of
         the corresponding FITS keywords.
         """
+<<<<<<< HEAD
         return [self.locator.dm_to_fits(key) for key in keywords]
         
+=======
+        pairs = self.to_fits_datamodels(keywords)
+        return [pair[0] for pair in pairs]
+    
+>>>>>>> 28f504fa452f7cb1dcf18979583f9828c85c0e30
     def to_fits_datamodels(self, keywords):
         """Returns [(FITS name, datamodels name), ...] associated with
         list of `keywords` names.
         """
+<<<<<<< HEAD
         return zip([self.locator.dm_to_fits(key) for key in keywords],
                    [self.locator.fits_to_dm(key) for key in keywords])
+=======
+        pairs = self.locator.get_fits_datamodel_pairs(keywords)
+        return [(pair[0],pair[1].lower()) for pair in pairs
+                if (not pair[0].startswith("META.") and
+                    pair[1].startswith("META."))]
+>>>>>>> 28f504fa452f7cb1dcf18979583f9828c85c0e30
 
 #         print((array_name, kind, shape, column_names, data_type))
 #         if kind == "TABLE":

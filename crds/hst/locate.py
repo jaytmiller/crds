@@ -72,12 +72,10 @@ def get_cross_strapped_pairs(header):
 def get_fits_datamodel_pairs(header):
     return [(key, key) for key in header]
 
-@utils.cached
 def fits_to_dm(fitskey):
     """Given `fitskey` returns corresponding datamodels path."""
     return fitskey  # XXXX no HST datamodels, see JWST
 
-@utils.cached
 def dm_to_fits(dmkey):
     """Given datamodels path `dmkey`,  returns corresponding FITS keyword."""
     return dmkey  # XXXX no HST datamodels, see JWST
