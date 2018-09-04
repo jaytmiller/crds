@@ -136,7 +136,7 @@ class FitsFile(AbstractFile):
     def get_array_names(self, **keys):
         """Return a list of the names of the arrays in self.filename."""
         with fits_open(self.filepath, **keys) as hdulist:
-            return [hdu.name + "__" + str(hdu.ver)
+            return [hdu.name + "__" + str(hdu.ver) if hdu.ver != 1 else hdu.name
                     for hdu in hdulist]
 
     def get_array_properties(self, array_name, keytype="A", **keys):

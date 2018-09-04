@@ -116,22 +116,23 @@ class RstInfoScript(cmdline.ContextsScript):
             yield self.reference_formats(refpath)
     
     def reference_formats(self, refpath):
-        # title = "Array Formats for " + repr(os.path.basename(refpath))
-        title = "Array Formats for " + self.characterize_refpath(refpath)
+        title = "Array Formats for " + repr(os.path.basename(refpath))
+        description = self.describe_refpath(refpath)
         colnames = ("Array Name", "Kind", "Shape", "Data Type")
         rows = self.get_array_formats(refpath)
-        table = rstutils.CrdsTable(title, colnames, rows)
+        table = rstutils.CrdsTable(title, colnames, rows,
+                                   description=description)
         return table.to_rst()
 
-    def characterize_refpath(self, refpath):
+    def describe_refpath(self, refpath):
         ref = os.path.basename(refpath)
         lookups = matches.find_full_match_paths(self.default_context, ref)
         lookup = lookups[0][1]
         lookup = [(self.locator.dm_to_fits(par[0]),repr(par[1]))
                    for par in lookup ]
-        selection = " ".join("=".join(par) for par in lookup)
-        date_time = "USEAFTER=" + repr(lookups[0][2][0][1])
-        return repr(ref) + " : " + selection + " " + date_time
+        selection = "\n ".join("=".join(par) for par in lookup) + "\n "
+        date_time = "USEAFTER=" + repr(lookups[0][2][0][1]) + "\n"
+        return " " + selection + date_time
 
     def get_array_formats(self, refpath):
         formats = []
@@ -154,6 +155,7 @@ class RstInfoScript(cmdline.ContextsScript):
         if re.match(r"^.*__\d+$", array_name):
             name, ver = array_name.split("__")
             array_name = f"({name},{ver})"
+        data_type = f"`{data_type}`"
         return (array_name, kind, shape, data_type)
     
     def print_array_names(self):
@@ -201,7 +203,7 @@ class RstInfoScript(cmdline.ContextsScript):
             rows += [criteria]
         reftype = loaded.filekind.upper()
         title = f"Reference Selection Keywords for {reftype}"
-        description = f"CRDS selects appropriate {reftype} references based on the following keywords.\n{reftype} is not applicable for instruments not in the table.\n"
+        description = f"CRDS selects appropriate {reftype} references based on the following keywords.\n{reftype} is not applicable for instruments not in the table.\nNon-standard keywords used for file selection are *required*.\n"
         return title, description, colnames, rows
 
     def get_fits_translations(self):
