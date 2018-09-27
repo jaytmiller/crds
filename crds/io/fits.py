@@ -84,6 +84,41 @@ class FitsFile(AbstractFile):
         return info_string
 
     def _array_name_to_hdu_index(self, array_name,**keys):
+        """Convert array names with extended notations into "index" values
+        which can be used to select particular HDUs.  
+
+        The extended notations include specifying HDUs using an extension number
+        pseudonym like this:
+
+        # does next to nothing.
+        >>> import os.path
+        >>> path = os.path.abspath("tests/data/y951738kl_hv.fits")
+        >>> fits_file = FitsFile(path)
+
+         # doesn't require a real file or validate that it exists
+        >>> fits_file._array_name_to_hdu_index("EXTENSION5")
+        ('5', 5)
+
+         # doesn't require a real file or validate that it exists
+        >>> fits_file._array_name_to_hdu_index("EXT5")
+        ('5', 5)
+
+        or by name but referring to a particular "ver" like this:
+
+        # info about file structure, real file required for this usecase
+        finfo crds/tests/data/y951738kl_hv.fits
+        -----------------------------------------------------
+        Filename: crds/tests/data/y951738kl_hv.fits
+        No.    Name      Ver    Type      Cards   Dimensions   Format
+        0  PRIMARY       1 PrimaryHDU      22   ()      
+        1  FUVA          1 BinTableHDU     17   106R x 2C   [D, I]   
+        2  FUVB          1 BinTableHDU     17   127R x 2C   [D, I]   
+
+        # Actual test and expected results
+        >>> fits_file._array_name_to_hdu_index("FUVB")
+        ('FUVB', 2)
+
+        """
         array_name = str(array_name)
         ext_match = re.match(r"(EXT(ENSION)?)?(\d+)", array_name)
         if ext_match:
@@ -92,10 +127,13 @@ class FitsFile(AbstractFile):
         ver_match = re.match(r"(.*)__(\d+)", array_name)
         if ver_match:
             name, ver = ver_match.group(1), int(ver_match.group(2))
-            return (name, ver), self._extension_number((name, ver))
-        return array_name, self._extension_number(array_name)
+            return (name, ver), self._extension_number((name, ver), **keys)
+        return array_name, self._extension_number(array_name, **keys)
 
     def _extension_number(self, index, **keys):
+        """Converts an HDU `index` value returned by _array_name_to_hdu_index() or HD
+        name (implicit ver 1) into a FITS HDU number.
+        """
         with fits_open(self.filepath, **keys) as hdus:
             for i, hdu in enumerate(hdus):
                 if isinstance(index, str):
@@ -207,3 +245,11 @@ class FitsFile(AbstractFile):
             for hdu in hdus:
                 hdu.verify("warn")
                 
+def test():
+    from crds.io import fits
+    import doctest
+    return doctest.testmod(fits)
+
+if __name__ == "__main__":
+    print(test())
+
