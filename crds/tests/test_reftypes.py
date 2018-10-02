@@ -1,10 +1,3 @@
-from __future__ import division # confidence high
-from __future__ import with_statement
-from __future__ import print_function
-from __future__ import absolute_import
-
-# ==================================================================================
-
 import os
 import tempfile
 
@@ -140,7 +133,7 @@ def reftypes_jwst_reference_name_to_tpn_infos():    # doctest: +ELLIPSIS
      ('META.REFTYPE', 'HEADER', 'CHARACTER', 'REQUIRED', values=()),
      ('META.SUBARRAY.FASTAXIS', 'HEADER', 'INTEGER', 'OPTIONAL', values=('1', '-1', '2', '-2')),
      ('META.SUBARRAY.FASTAXIS', 'HEADER', 'INTEGER', 'REQUIRED', values=()),
-     ('META.SUBARRAY.NAME', 'HEADER', 'CHARACTER', 'OPTIONAL', values=('BRIGHTSKY', 'MASK1065', 'MASK1140', 'MASK1550', 'MASKLYOT', 'SLITLESSPRISM', 'SUB128', 'SUB256', 'SUB64', 'SUBPRISM', 'FULL', 'GENERIC', 'ANY', 'N/A')),
+     ('META.SUBARRAY.NAME', 'HEADER', 'CHARACTER', 'OPTIONAL', values=('BRIGHTSKY', 'MASK1065', 'MASK1140', 'MASK1550', 'MASKLYOT', 'SLITLESSPRISM', 'SUBPRISM', 'SUB128', 'SUB256', 'SUB64', 'FULL', 'GENERIC', 'ANY', 'N/A')),
      ('META.SUBARRAY.NAME', 'HEADER', 'CHARACTER', 'REQUIRED', values=()),
      ('META.SUBARRAY.SLOWAXIS', 'HEADER', 'INTEGER', 'OPTIONAL', values=('1', '-1', '2', '-2')),
      ('META.SUBARRAY.SLOWAXIS', 'HEADER', 'INTEGER', 'REQUIRED', values=()),

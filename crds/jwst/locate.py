@@ -6,9 +6,6 @@ specific policies for JWST:
 2. How to manage parameters for reference file Validator objects used
 in the certification of reference files. 
 """
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
 import os.path
 import re
 
@@ -42,11 +39,21 @@ from crds.jwst.pipeline import get_reftypes, get_pipelines
 
 # =======================================================================
 
-try:
-    from jwst.datamodels import DataModel
-    MODEL = DataModel()
-except Exception:
-    MODEL = None
+MODEL = None
+
+def get_datamodels():
+    try:
+        from jwst import datamodels  # this is fatal.
+    except ImportError:
+        log.error(
+            "CRDS requires installation of the 'jwst' package to operate on JWST files.")
+        raise
+    global MODEL
+    if MODEL is None:
+        with log.error_on_exception(
+                "Failed constructing basic JWST DataModel"):
+            MODEL = datamodels.DataModel()
+    return datamodels
 
 # =============================================================================
 
@@ -68,7 +75,7 @@ def project_check(refpath):
 
 def get_data_model_flat_dict(filepath):
     """Get the header from `filepath` using the jwst data model."""
-    from jwst import datamodels
+    datamodels = get_datamodels()
     log.info("Checking JWST datamodels.")
     # with log.error_on_exception("JWST Data Model (jwst.datamodels)"):
     try:
@@ -364,8 +371,6 @@ class MissingDependencyError(Exception):
 
 def fits_to_parkeys(fits_header):
     """Map a FITS header onto rmap parkeys appropriate for JWST."""
-    if MODEL is None:
-        raise MissingDependencyError("JWST data models are not installed.   Cannot fits_to_parkeys().")
     parkeys = {}
     for key, value in fits_header.items():
         key, value = str(key), str(value)
@@ -382,8 +387,6 @@ def fits_to_parkeys(fits_header):
         pk = pk.upper()
         parkeys[pk] = value
     return parkeys
-
-
 
 def fits_to_dm(fitskey):
     """Given `fitskey` returns corresponding datamodels path."""
