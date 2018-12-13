@@ -12,7 +12,7 @@ import numpy as np
 
 # ============================================================================
 
-from crds.core import log, utils, timestamp, selectors
+from crds.core import log, utils, timestamp, selectors, config
 from crds.core.exceptions import MissingKeywordError, IllegalKeywordError
 from crds.core.exceptions import TpnDefinitionError, RequiredConditionError
 from crds.core.exceptions import BadKernelSumError, BadKernelCenterPixelTooSmall
@@ -664,23 +664,32 @@ class IsomorphicfitsverValidator(Validator):
             for hdu in hdus:
                 if hdu.name != self.name:
                     continue
-                self.verbose(filename, f"ver={hdu.ver}",
-                             f"Array has shape={hdu.data.shape} and dtype={repr(str(hdu.data.dtype))}).")
+                self.verbose(filename, "ver=" + str(hdu.ver),
+                             "Array has shape=" + str(hdu.data.shape),
+                             "and dtype=" + repr(str(hdu.data.dtype)) + ".")
                 if hdu.name not in first:
                     first[hdu.name] = (hdu.data.shape, hdu.data.dtype)
                 else:
                     expected = first[hdu.name][0]
                     got = hdu.data.shape
                     assert expected == got, \
-                        f"Shape mismtatch for ('{hdu.name}',{hdu.ver}) relative to ('{self.name}',1). Expected {expected} but got {got}."
+                        "Shape mismtatch for " + repr((hdu.name, hdu.ver)) + \
+                        "relative to" + repr((self.name,1)) + ". Expected " + \
+                        str(expected) + " but got " + str(got) + "."
                     expected = first[hdu.name][1]
                     got = hdu.data.dtype
                     assert expected == got, \
-                        f"Data type mismtatch for ('{hdu.name}',{hdu.ver}) relative to ('{self.name}',1). Expected {expected} but got {got}."
+                        "Data type mismtatch for " + \
+                        repr((hdu.name,hdu.ver)) + \
+                        " relative to " + repr((self.name,1)) + \
+                        ". Expected " + str(expected) + \
+                        " but got " + str(got) + "."
                 max_ver = hdu.ver
             if self.max_ver is not None:
                 assert self.max_ver == max_ver, \
-                    f"Bad maximum HDU ver for '{self.name}'. Expected {self.max_ver}, got {max_ver}."
+                    "Bad maximum HDU ver for " + repr(self.name) + \
+                    ". Expected " +  str(self.max_ver) + \
+                    ", got " + str(max_ver) + "."
 
 class Isomorphicfitsver4Validator(IsomorphicfitsverValidator):
     max_ver = 4
@@ -690,6 +699,32 @@ class Isomorphicfitsver2Validator(IsomorphicfitsverValidator):
 
 class Isomorphicfitsver1Validator(IsomorphicfitsverValidator):
     max_ver = 1
+    
+# ----------------------------------------------------------------------------
+
+class FileexistsValidator(Validator):
+    """"""
+    def _check_value(self, filename, value):
+        """Verify that the file named `value` defined somewhere in certified
+        file `filename` actually exists in CRDS.   This is useful for e.g.
+        checking that a SYNPHOT TMC or TMT filename column value actually
+        exists in CRDS.
+        """
+        observatory = utils.file_to_observatory(self.condition(filename))
+        checked_path = config.locate_file(value, observatory)
+        log.verbose("Checking file", repr(value), "for existence in CRDS cache.")
+        if not os.path.exists(checked_path):
+            raise ValueError("Required CRDS file " + repr(value) + " does not exist in CRDS cache.")
+
+    def condition(self, value):
+        crds_name = value
+        if "$" in value: # remove IRAF-style path prefix from SYNPHOT TMC and TMT filename column values
+            crds_name = crds_name.split("$")[-1]
+        if "[" in value: # split off HDU index trailer,  or SYNPHOT parameterization trailer
+            crds_name = crds_name.split("[")[0]
+        log.verbose("Conditioned filepath", repr(value), "to", repr(crds_name))
+        return crds_name
+
     
 # ----------------------------------------------------------------------------
 

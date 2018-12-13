@@ -4,6 +4,8 @@ the transformations required to automate rmap maintenance on the CRDS website.
 import sys
 import os.path
 
+# ============================================================================
+    
 from crds.core import exceptions, rmap, log, cmdline
 from crds.core.log import srepr
 from crds import diff
@@ -57,36 +59,67 @@ def rmap_insert_references(old_rmap, new_rmap, inserted_references):
     or replacing all files in `inserted_references` and write out the result to
     `new_rmap`.    If no actions are performed, don't write out `new_rmap`.
     
-    Return new ReferenceMapping named `new_rmap`
+    old_rmap  str     Filepath of source rmap into which `inserted_references` will be inserted
+    new_rmap  str     Filepath of updated rmap written out
+    inserted_references [ str, ...]    List of reference filepaths to be insterted
+
+    Note that "inserting" a reference file can result in:
+
+    1. adding a new match case,  
+    2. adding a new USEAFTER case
+    3. exactly replacing an existing reference file. 
+
+    Other outcomes are also possible for non-standard rmap selector class configurations.
+
+    Additional checking:
+
+    1. Generates an ERROR if any of the inserted reference files have identical
+    matching criteria since only one file with those criteria would be added to
+    the rmap and the other(s) would be "replaced" by their own insertion set.
+    Note: it is valid/common for an inserted reference to replace a reference
+    which is already in `old_rmap`.  This ERROR only applies to equalities
+    within the inserted_references list.
+
+    2. Generates a WARNING if the matching criteria of any inserted reference
+    file is a proper subset of inserted or existing references.  Thes subsets
+    will generally lead to the addition of new matching cases.  Since CRDS
+    inherited instances of these "subset overlaps" from HST CDBS, this warning
+    is only visible with --verbose for HST, they exist.  Since this condition
+    is bad both for understanding rmaps and for runtime complexity and
+    performance, for JWST the warning is visible without --verbose and will
+    also generate a runtime ERROR.  For JWST there is the expectation that an
+    offending file submission will either be (a) cancelled and corrected or (b)
+    provisionally accepted followed by an immediate manual rmap correction.
+    Provisional acceptance gives the option of f keeping the work
+    associated with large deliveries where the corrective measure might be to
+    manually merge overlapping categories with rmap edits.
+
+    Return None,  `new_rmap` is already the implicit result
     """
     new = old = rmap.fetch_mapping(old_rmap, ignore_checksum=True)
     inserted_cases = {}
-    exc = None
     for reference in inserted_references:
-        log.info("Inserting", os.path.basename(reference), "into",
-                 repr(new.name))
+        log.info("Inserting", os.path.basename(reference), "into", repr(new.name))
         new = new.insert_reference(reference)
         baseref = os.path.basename(reference)
-        cases = []
-        with log.warn_on_exception("Failed capturing matching diagnostics for",
-                                   repr(baseref)):
+        with log.warn_on_exception("Failed checking rmap update for", repr(baseref)):
             cases = new.file_matches(baseref)
-        for fullcase in cases:
-            case = fullcase[1:]
-            if case not in inserted_cases:
-                inserted_cases[case] = baseref
-            else:
-                exc = exceptions.OverlappingMatchError(
-                    "Matching case for", srepr(baseref),
-                    "overlaps", srepr(inserted_cases[case]),
-                    "at case", repr(case))
-                log.error(str(exc))
-    if exc is not None:
-        raise exc
+            for fullcase in cases:
+                case = fullcase[1:]
+                if case not in inserted_cases:
+                    inserted_cases[case] = baseref
+                else:
+                    log.error("-"*40 + "\nBoth", srepr(baseref), 
+                              "and", srepr(inserted_cases[case]),
+                              "identically match case:\n", log.PP(case), """
+Each reference would replace the other in the rmap.
+Either reference file matching parameters need correction
+or additional matching parameters should be added to the rmap
+to enable CRDS to differentiate between the two files.""")
+                
     new.header["derived_from"] = old.basename
     log.verbose("Writing", repr(new_rmap))
     new.write(new_rmap)
-    return new
 
 def rmap_delete_references(old_rmap, new_rmap, deleted_references):
     """Given the full path of starting rmap `old_rmap`,  modify it by deleting 
@@ -148,6 +181,8 @@ class RefactorScript(cmdline.Script):
     
     epilog = """    
     """
+
+    locate_file = cmdline.Script.locate_file_outside_cache
     
     def add_args(self):
         self.add_argument("command", choices=("insert", "delete", "set_header", "del_header"),
@@ -158,20 +193,35 @@ class RefactorScript(cmdline.Script):
             help="Name of modified reference mapping output file.")        
         self.add_argument('references', type=str, nargs="+",
             help="Reference files to insert into (or delete from) `old_rmap` to produce `new_rmap`.")
+
+    @property
+    def old_rmap(self):
+        return self.locate_file(self.args.old_rmap)
+
+    @property
+    def new_rmap(self):
+        return self.locate_file(self.args.new_rmap)
+
+    @property
+    def ref_paths(self):
+        self.args.files = self.args.references
+        return self.files  # standard file location and @-handling for self.args.files
         
     def main(self):
         with log.error_on_exception("Refactoring operation FAILED"):
             if self.args.command == "insert":
-                rmap_insert_references(self.args.old_rmap, self.args.new_rmap, self.args.references)
+                rmap_insert_references(self.old_rmap, self.new_rmap, self.ref_paths)
             elif self.args.command == "delete":
-                rmap_delete_references(self.args.old_rmap, self.args.new_rmap, self.args.references)
+                rmap_delete_references(self.old_rmap, self.new_rmap, self.ref_paths)
             elif self.args.command == "set_header":
-                set_header_value(self.args.old_rmap, self.args.new_rmap, self.args.references[0], 
-                                 " ".join(self.args.references[1:]))
+                field, setting = self.args.references[0], " ".join(self.args.references[1:])
+                set_header_value(self.old_rmap, self.new_rmap, field, setting)
             elif self.args.command == "del_header":
-                del_header_value(self.args.old_rmap, self.args.new_rmap, self.args.references[0])
+                field = self.args.references[0]
+                del_header_value(self.old_rmap, self.new_rmap, field)
             else:
                 raise ValueError("Unknown refactoring command: " + repr(self.args.command))
+        log.standard_status()
         return log.errors()
 
 if __name__ == "__main__":
