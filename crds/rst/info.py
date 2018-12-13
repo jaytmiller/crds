@@ -39,7 +39,7 @@ class RstInfoScript(cmdline.ContextsScript):
     NIRISS     INSTRUME, EXP_TYPE, DETECTOR, FILTER, PUPIL, DATE-OBS, TIME-OBS 
     ---------- ---------------------------------------------------------------
     
-    2. crds rstinfo --datamodels-translations --
+    2. crds rstinfo --datamodels-translations
     FITS to Data Models Translations
     ================================
     -------- ---------------------------------
@@ -238,46 +238,6 @@ class RstInfoScript(cmdline.ContextsScript):
         """
         return zip([self.locator.dm_to_fits(key) for key in keywords],
                    [self.locator.fits_to_dm(key) for key in keywords])
-
-#         print((array_name, kind, shape, column_names, data_type))
-#         if kind == "TABLE":
-#             data_type = dict(data_type)
-#             for colname in column_names:
-#                 data_type[colname] = self.simplify_col_format(data_type[colname])
-#         return (array_name, kind, shape, data_type)
-
-# #    def simplify_col_format(self, coltype):
-# #        return re.sub(r"[\"\']([^ ]+[\',",
-
-# # ============================================================================
-
-# def simplify_type(raw_match):
-#     label = raw_match.group(1)
-#     repeat = raw_match.group(2)
-#     atype = raw_match.group(3)
-#     digits = raw_match.group(4)
-#     trail = raw_match.group(5)
-#     pprint.pprint((label, repeat, atype, digits, trail))
-#     long_atype = {
-#         "b" : "bytes",
-#         "i" : "int",
-#         "u" : "uint",
-#         "f" : "float",
-#         "c" : "complex",
-#         "S" : "string",
-#     }[atype]
-#     if repeat == None:
-#         repeat = ""
-#     else:
-#         repeat = f"[{repeat}]"
-#     if long_atype != "string":
-#         bits = str(2**int(digits))
-#     else:
-#         bits = str(digits) # actually bytes
-#     field = label + long_atype + bits + repeat
-#     if field.endswith(tuple("0123456789")):
-#         field = field + ", "
-#     return field
 
 # ============================================================================
 
