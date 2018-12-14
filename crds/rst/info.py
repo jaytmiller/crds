@@ -191,6 +191,7 @@ class RstInfoScript(cmdline.ContextsScript):
         """
         colnames = ("Instrument", "Keywords")
         rows = []
+        loaded = None
         for context in self.contexts:
             assert context.endswith(".rmap"), \
                 f"Context {context} is not an rmap."
@@ -201,10 +202,13 @@ class RstInfoScript(cmdline.ContextsScript):
             required = repr(required)[1:-1].replace("'","")  # drop [,],'
             criteria = (loaded.instrument.upper(),required)
             rows += [criteria]
-        reftype = loaded.filekind.upper()
-        title = f"Reference Selection Keywords for {reftype}"
-        description = f"CRDS selects appropriate {reftype} references based on the following keywords.\n{reftype} is not applicable for instruments not in the table.\nNon-standard keywords used for file selection are *required*.\n"
-        return title, description, colnames, rows
+        if loaded:
+            reftype = loaded.filekind.upper()
+            title = f"Reference Selection Keywords for {reftype}"
+            description = f"CRDS selects appropriate {reftype} references based on the following keywords.\n{reftype} is not applicable for instruments not in the table.\nNon-standard keywords used for file selection are *required*.\n"
+            return title, description, colnames, rows
+        else:
+            raise RuntimeError("No contexts or rmaps identified.")
 
     def get_fits_translations(self):
         """Returns a sorted list of the form:
