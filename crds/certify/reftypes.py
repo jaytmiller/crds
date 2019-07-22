@@ -46,7 +46,7 @@ class TypeSpec(dict):
         """
         header = utils.Struct(header)
         assert "suffix" in header
-        assert "text_descr" in header or header.filetype == "all"
+        assert "text_descr" in header or header.filetype == "xxx"
         if "tpn" not in header:
             header.tpn = header.instrument.lower() + "_" + header.suffix + ".tpn"
         if "ld_tpn" not in header:
@@ -270,9 +270,9 @@ class TypeParameters:
                     (instrument, filekind, field), ":", str(exc),
                                     verbosity=75)
         append_tpn_level(results, instrument, filekind)
-        append_tpn_level(results, instrument, "all")
-        append_tpn_level(results, "all", filekind)
-        append_tpn_level(results, "all", "all")
+        append_tpn_level(results, instrument, "xxx")
+        append_tpn_level(results, "xxx", filekind)
+        append_tpn_level(results, "xxx", "xxx")
         return results
 
 # -----------------------------------------------------------------------------

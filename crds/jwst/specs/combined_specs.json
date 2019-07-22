@@ -1,125 +1,5 @@
 {
-    "all":{
-        "all":{
-            "extra_keys":null,
-            "file_ext":".fits",
-            "filetype":"xxx",
-            "instrument":"all",
-            "ld_tpn":"all_all_ld.tpn",
-            "suffix":"xxx",
-            "text_descr":"All instruments and reference file types.",
-            "tpn":"all_all.tpn",
-            "unique_rowkeys":null
-        },
-        "dark":{
-            "extra_keys":null,
-            "file_ext":".fits",
-            "filekind":"DARK",
-            "filetype":"DARK",
-            "instrument":"ALL",
-            "ld_tpn":"all_dark_ld.tpn",
-            "observatory":"JWST",
-            "suffix":"DARK",
-            "text_descr":"Dark files for all instruments.",
-            "tpn":"all_dark.tpn",
-            "unique_rowkeys":null
-        },
-        "gain":{
-            "extra_keys":null,
-            "file_ext":".fits",
-            "filekind":"GAIN",
-            "filetype":"GAIN",
-            "instrument":"ALL",
-            "ld_tpn":"all_gain_ld.tpn",
-            "observatory":"JWST",
-            "suffix":"GAIN",
-            "text_descr":"Gain",
-            "tpn":"all_gain.tpn",
-            "unique_rowkeys":null
-        },
-        "ipc":{
-            "extra_keys":null,
-            "file_ext":".fits",
-            "filekind":"IPC",
-            "filetype":"IPC",
-            "instrument":"ALL",
-            "ld_tpn":"all_ipc_ld.tpn",
-            "observatory":"JWST",
-            "suffix":"IPC",
-            "text_descr":"Interpixel Capacitance",
-            "tpn":"all_ipc.tpn",
-            "unique_rowkeys":null
-        },
-        "photom":{
-            "extra_keys":null,
-            "file_ext":".fits",
-            "filekind":"PHOTOM",
-            "filetype":"PHOTOM",
-            "instrument":"ALL",
-            "ld_tpn":"all_photom_ld.tpn",
-            "observatory":"JWST",
-            "suffix":"PHOTOM",
-            "text_descr":"Dark files for all instruments.",
-            "tpn":"all_photom.tpn",
-            "unique_rowkeys":null
-        },
-        "rscd":{
-            "extra_keys":null,
-            "file_ext":".fits",
-            "filekind":"RSCD",
-            "filetype":"RSCD",
-            "instrument":"ALL",
-            "ld_tpn":"all_rscd_ld.tpn",
-            "observatory":"JWST",
-            "suffix":"RSCD",
-            "text_descr":"Reset Switch Charge Decay Correction",
-            "tpn":"all_rscd.tpn",
-            "unique_rowkeys":[
-                "READPATT",
-                "SUBARRAY",
-                "ROWS"
-            ]
-        },
-        "throughput":{
-            "extra_keys":null,
-            "file_ext":".fits",
-            "filekind":"THROUGHPUT",
-            "filetype":"THROUGHPUT",
-            "instrument":"ALL",
-            "ld_tpn":"all_throughput_ld.tpn",
-            "observatory":"JWST",
-            "suffix":"THROUGHPUT",
-            "text_descr":"Throughput constraints for all instruments.",
-            "tpn":"all_throughput.tpn",
-            "unique_rowkeys":null
-        },
-        "trappars":{
-            "extra_keys":null,
-            "file_ext":".fits",
-            "filekind":"TRAPPARS",
-            "filetype":"TRAPPARS",
-            "instrument":"ALL",
-            "ld_tpn":"all_trappars_ld.tpn",
-            "observatory":"JWST",
-            "suffix":"TRAPPARS",
-            "text_descr":"Trap Capture and Decay Parameters",
-            "tpn":"all_trappars.tpn",
-            "unique_rowkeys":null
-        }
-    },
     "fgs":{
-        "all":{
-            "extra_keys":null,
-            "file_ext":".fits",
-            "filekind":"all",
-            "filetype":"all",
-            "instrument":"fgs",
-            "ld_tpn":"fgs_all.tpn",
-            "suffix":"all",
-            "text_descr":"All FGS reference file types.",
-            "tpn":"fgs_all.tpn",
-            "unique_rowkeys":null
-        },
         "amplifier":{
             "derived_from":"cloning tool 0.03b (2012-09-11)",
             "extra_keys":null,
@@ -555,21 +435,21 @@
             "text_descr":"World Coordinate System Regions",
             "tpn":"fgs_wcsregions.tpn",
             "unique_rowkeys":null
-        }
-    },
-    "miri":{
-        "all":{
+        },
+        "xxx":{
             "extra_keys":null,
             "file_ext":".fits",
             "filekind":"all",
             "filetype":"all",
-            "instrument":"miri",
-            "ld_tpn":"miri_all.tpn",
+            "instrument":"fgs",
+            "ld_tpn":"fgs_all.tpn",
             "suffix":"all",
-            "text_descr":"All MIRI reference file types.",
-            "tpn":"miri_all.tpn",
+            "text_descr":"All FGS reference file types.",
+            "tpn":"fgs_all.tpn",
             "unique_rowkeys":null
-        },
+        }
+    },
+    "miri":{
         "amplifier":{
             "derived_from":"cloning tool 0.03b (2012-09-11)",
             "extra_keys":null,
@@ -1498,21 +1378,21 @@
             "text_descr":"World Coordinate System Regions",
             "tpn":"miri_wcsregions.tpn",
             "unique_rowkeys":null
-        }
-    },
-    "nircam":{
-        "all":{
+        },
+        "xxx":{
             "extra_keys":null,
             "file_ext":".fits",
             "filekind":"all",
             "filetype":"all",
-            "instrument":"nircam",
-            "ld_tpn":"nircam_all.tpn",
+            "instrument":"miri",
+            "ld_tpn":"miri_all.tpn",
             "suffix":"all",
-            "text_descr":"All nircam reference file types.",
-            "tpn":"nircam_all.tpn",
+            "text_descr":"All MIRI reference file types.",
+            "tpn":"miri_all.tpn",
             "unique_rowkeys":null
-        },
+        }
+    },
+    "nircam":{
         "amplifier":{
             "derived_from":"cloning tool 0.03b (2012-09-11)",
             "extra_keys":null,
@@ -2105,21 +1985,21 @@
             "text_descr":"WFSS master background reference images",
             "tpn":"nircam_wfssbkg.tpn",
             "unique_rowkeys":null
-        }
-    },
-    "niriss":{
-        "all":{
+        },
+        "xxx":{
             "extra_keys":null,
             "file_ext":".fits",
             "filekind":"all",
             "filetype":"all",
-            "instrument":"niriss",
-            "ld_tpn":"niriss_all.tpn",
+            "instrument":"nircam",
+            "ld_tpn":"nircam_all.tpn",
             "suffix":"all",
-            "text_descr":"All NIRISS reference file types.",
-            "tpn":"niriss_all.tpn",
+            "text_descr":"All nircam reference file types.",
+            "tpn":"nircam_all.tpn",
             "unique_rowkeys":null
-        },
+        }
+    },
+    "niriss":{
         "amplifier":{
             "derived_from":"cloning tool 0.03b (2012-09-11)",
             "extra_keys":null,
@@ -2727,21 +2607,21 @@
             "text_descr":"WFSS master background reference images",
             "tpn":"niriss_wfssbkg.tpn",
             "unique_rowkeys":null
-        }
-    },
-    "nirspec":{
-        "all":{
+        },
+        "xxx":{
             "extra_keys":null,
             "file_ext":".fits",
             "filekind":"all",
             "filetype":"all",
-            "instrument":"nirspec",
-            "ld_tpn":"nirspec_all.tpn",
+            "instrument":"niriss",
+            "ld_tpn":"niriss_all.tpn",
             "suffix":"all",
-            "text_descr":"All NIRSPEC reference file types.",
-            "tpn":"nirspec_all.tpn",
+            "text_descr":"All NIRISS reference file types.",
+            "tpn":"niriss_all.tpn",
             "unique_rowkeys":null
-        },
+        }
+    },
+    "nirspec":{
         "amplifier":{
             "derived_from":"cloning tool 0.03b (2012-09-11)",
             "extra_keys":null,
@@ -3829,6 +3709,18 @@
             "text_descr":"World Coordinate System Regions",
             "tpn":"nirspec_wcsregions.tpn",
             "unique_rowkeys":null
+        },
+        "xxx":{
+            "extra_keys":null,
+            "file_ext":".fits",
+            "filekind":"all",
+            "filetype":"all",
+            "instrument":"nirspec",
+            "ld_tpn":"nirspec_all.tpn",
+            "suffix":"all",
+            "text_descr":"All NIRSPEC reference file types.",
+            "tpn":"nirspec_all.tpn",
+            "unique_rowkeys":null
         }
     },
     "system":{
@@ -3916,6 +3808,114 @@
             "suffix":"datalvl",
             "text_descr":"Reference Type to Processing Data Level",
             "tpn":"system_datalvl.tpn",
+            "unique_rowkeys":null
+        }
+    },
+    "xxx":{
+        "dark":{
+            "extra_keys":null,
+            "file_ext":".fits",
+            "filekind":"DARK",
+            "filetype":"DARK",
+            "instrument":"ALL",
+            "ld_tpn":"all_dark_ld.tpn",
+            "observatory":"JWST",
+            "suffix":"DARK",
+            "text_descr":"Dark files for all instruments.",
+            "tpn":"all_dark.tpn",
+            "unique_rowkeys":null
+        },
+        "gain":{
+            "extra_keys":null,
+            "file_ext":".fits",
+            "filekind":"GAIN",
+            "filetype":"GAIN",
+            "instrument":"ALL",
+            "ld_tpn":"all_gain_ld.tpn",
+            "observatory":"JWST",
+            "suffix":"GAIN",
+            "text_descr":"Gain",
+            "tpn":"all_gain.tpn",
+            "unique_rowkeys":null
+        },
+        "ipc":{
+            "extra_keys":null,
+            "file_ext":".fits",
+            "filekind":"IPC",
+            "filetype":"IPC",
+            "instrument":"ALL",
+            "ld_tpn":"all_ipc_ld.tpn",
+            "observatory":"JWST",
+            "suffix":"IPC",
+            "text_descr":"Interpixel Capacitance",
+            "tpn":"all_ipc.tpn",
+            "unique_rowkeys":null
+        },
+        "photom":{
+            "extra_keys":null,
+            "file_ext":".fits",
+            "filekind":"PHOTOM",
+            "filetype":"PHOTOM",
+            "instrument":"ALL",
+            "ld_tpn":"all_photom_ld.tpn",
+            "observatory":"JWST",
+            "suffix":"PHOTOM",
+            "text_descr":"Dark files for all instruments.",
+            "tpn":"all_photom.tpn",
+            "unique_rowkeys":null
+        },
+        "rscd":{
+            "extra_keys":null,
+            "file_ext":".fits",
+            "filekind":"RSCD",
+            "filetype":"RSCD",
+            "instrument":"ALL",
+            "ld_tpn":"all_rscd_ld.tpn",
+            "observatory":"JWST",
+            "suffix":"RSCD",
+            "text_descr":"Reset Switch Charge Decay Correction",
+            "tpn":"all_rscd.tpn",
+            "unique_rowkeys":[
+                "READPATT",
+                "SUBARRAY",
+                "ROWS"
+            ]
+        },
+        "throughput":{
+            "extra_keys":null,
+            "file_ext":".fits",
+            "filekind":"THROUGHPUT",
+            "filetype":"THROUGHPUT",
+            "instrument":"ALL",
+            "ld_tpn":"all_throughput_ld.tpn",
+            "observatory":"JWST",
+            "suffix":"THROUGHPUT",
+            "text_descr":"Throughput constraints for all instruments.",
+            "tpn":"all_throughput.tpn",
+            "unique_rowkeys":null
+        },
+        "trappars":{
+            "extra_keys":null,
+            "file_ext":".fits",
+            "filekind":"TRAPPARS",
+            "filetype":"TRAPPARS",
+            "instrument":"ALL",
+            "ld_tpn":"all_trappars_ld.tpn",
+            "observatory":"JWST",
+            "suffix":"TRAPPARS",
+            "text_descr":"Trap Capture and Decay Parameters",
+            "tpn":"all_trappars.tpn",
+            "unique_rowkeys":null
+        },
+        "xxx":{
+            "extra_keys":null,
+            "file_ext":".fits",
+            "filetype":"xxx",
+            "instrument":"all",
+            "ld_tpn":"all_all_ld.tpn",
+            "suffix":"xxx",
+            "text_descr":"All instruments and reference file types.",
+            "tpn":"all_all.tpn",
             "unique_rowkeys":null
         }
     }

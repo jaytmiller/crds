@@ -512,12 +512,12 @@ class RefactorScript2(cmdline.Script):
                                            source_context=self.source_context, **keywords)
         else:
             pmapping = rmap.load_mapping(self.source_context)
-            instruments = pmapping.selections.keys() if "all" in self.args.instruments else self.args.instruments
+            instruments = pmapping.selections.keys() if "xxx" in self.args.instruments else self.args.instruments
             for instr in instruments:
                 with log.augment_exception("Failed loading imap for", repr(instr), "from",
                                             repr(self.source_context)):
                     imapping = pmapping.get_imap(instr)
-                types = imapping.selections.keys() if "all" in self.args.types else self.args.types
+                types = imapping.selections.keys() if "xxx" in self.args.types else self.args.types
                 for filekind in types:
                     with log.error_on_exception("Failed processing rmap for", repr(filekind)):
                         #, "from",

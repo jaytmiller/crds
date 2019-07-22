@@ -399,7 +399,7 @@ def _std_cache_path(observatory, root_env, subdir):
     CRDS_PATH_SINGLE     -->   <env path for overall cache for one observatory> + "/mappings/"
     CRDS_PATH            -->   <env path for overall cache for all observatories> + "/mappings/" + <observatory>
 
-    XXXX `observatory` should accept pseudo-observatory "all"
+    XXXX `observatory` should accept pseudo-observatory "xxx"
     """
     if root_env + "_SINGLE" in os.environ:
         path = os.environ[root_env + "_SINGLE"]
@@ -500,8 +500,8 @@ def get_crds_root_cfgpath():
 
     >>> os.environ = temp
     """
-    dirname = get_crds_cfgpath("all")
-    if dirname.endswith("all"):
+    dirname = get_crds_cfgpath("xxx")
+    if dirname.endswith("xxx"):
         return os.path.dirname(dirname)
     else:
         return dirname

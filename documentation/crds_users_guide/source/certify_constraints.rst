@@ -48,13 +48,13 @@ For HST, .tpn files were written for every combination of <instrument>_<type>.
 For JWST, additional broader classes of .tpn are also defined and all
 applicable forms are loaded for any given reference file::
 
-    all _ all .tpn                 (constraints on all instruments and types)
-    <instrument> _ all .tpn        (constraints on all types of one instrument)
-    all _ <type> .tpn              (constraints on one type of all instruments)
+    xxx _ xxx .tpn                 (constraints on all instruments and types)
+    <instrument> _ xxx .tpn        (constraints on all types of one instrument)
+    xxx _ <type> .tpn              (constraints on one type of all instruments)
     <instrument> _ <type> .tpn     (constraint on one instrument and type)
 
 For JWST,  the additional file classes permit generalization of constraints
-without added redundancy.   PEDIGREE can defined once in all_all,  etc.
+without added redundancy.   PEDIGREE can defined once in xxx_xxx,  etc.
 
 There are two forms of .tpn, one which constrains reference file properties
 (.tpn) and one which constrains rmap properties (_ld.tpn).  The _ld.tpn files
@@ -120,7 +120,7 @@ For the sake of simplicity, the line of the directive should begin with
 of exactly two words,  written on a single line.
 
 An included file should also be located in the .tpn includes directory and
-generally will not follow the JWST classes of include files (all_all, fgs_all,
+generally will not follow the JWST classes of include files (xxx_xxx, fgs_xxx,
 etc.) or their naming conventions.
 
 Replace Directive
@@ -143,7 +143,7 @@ array.
 
 An important limitation of 'replace' to note is that it only applies within the
 textual extent of on particular file class.   At this time,  it's not possible
-to e.g. define a replacement in all_all and have it apply everywhere.
+to e.g. define a replacement in xxx_xxx and have it apply everywhere.
 
 
 Constraint Directive
