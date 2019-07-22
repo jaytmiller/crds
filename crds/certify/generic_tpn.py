@@ -305,12 +305,12 @@ def load_all_type_constraints(observatory):
             else:
                 locator.get_all_tpninfos(instr, suffix, "tpn")  # With core schema,  one type loads all
                 locator.get_all_tpninfos(instr, suffix, "ld_tpn")  # With core schema,  one type loads all
-                locator.get_all_tpninfos("all", suffix, "tpn")  # With core schema,  one type loads all
-                locator.get_all_tpninfos("all", suffix, "ld_tpn")  # With core schema,  one type loads all
-        locator.get_all_tpninfos(instr, "all", "tpn")
-        locator.get_all_tpninfos(instr, "all", "ld_tpn")
-    locator.get_all_tpninfos("all","all","tpn")
-    locator.get_all_tpninfos("all","all","ld_tpn")
+                locator.get_all_tpninfos("xxx", suffix, "tpn")  # With core schema,  one type loads all
+                locator.get_all_tpninfos("xxx", suffix, "ld_tpn")  # With core schema,  one type loads all
+        locator.get_all_tpninfos(instr, "xxx", "tpn")
+        locator.get_all_tpninfos(instr, "xxx", "ld_tpn")
+    locator.get_all_tpninfos("xxx","xxx","tpn")
+    locator.get_all_tpninfos("xxx","xxx","ld_tpn")
 
 # =============================================================================
 

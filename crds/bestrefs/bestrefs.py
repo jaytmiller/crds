@@ -342,7 +342,7 @@ than errors as the default.
             self.instruments = self.args.instruments
         elif self.args.all_instruments:
             instruments = list(self.obs_pkg.INSTRUMENTS)
-            for instr in ("all","system","synphot"):
+            for instr in ("xxx","system","synphot"):
                 if instr in instruments:
                     instruments.remove(instr)
             self.instruments = instruments
