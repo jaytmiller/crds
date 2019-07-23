@@ -1,11 +1,11 @@
 {
     'observatory' : 'JWST',
-    'instrument' : 'ALL',
+    'instrument' : 'xxx',
     'filekind' : 'RSCD',
     'filetype' : 'RSCD',
     'suffix' : 'RSCD',
     'text_descr' : 'Reset Switch Charge Decay Correction',
-    'ld_tpn': 'all_rscd_ld.tpn',  # identical
-    'tpn': 'all_rscd.tpn',
+    'ld_tpn': 'xxx_rscd_ld.tpn',  # identical
+    'tpn': 'xxx_rscd.tpn',
     'unique_rowkeys': ('READPATT','SUBARRAY','ROWS')
 }

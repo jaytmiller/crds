@@ -1,10 +1,10 @@
 {
     'observatory' : 'JWST',
-    'instrument' : 'ALL',
+    'instrument' : 'xxx',
     'filekind' : 'THROUGHPUT',
     'filetype' : 'THROUGHPUT',
     'suffix' : 'THROUGHPUT',
-    'text_descr' : 'Throughput constraints for all instruments.',
-    'ld_tpn': 'all_throughput_ld.tpn',  # identical
-    'tpn': 'all_throughput.tpn',
+    'text_descr' : 'Throughput constraints for xxx instruments.',
+    'ld_tpn': 'xxx_throughput_ld.tpn',  # identical
+    'tpn': 'xxx_throughput.tpn',
 }

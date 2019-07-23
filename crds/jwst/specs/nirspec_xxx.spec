@@ -1,9 +1,9 @@
 {
     'instrument' : 'nirspec',
-    'filetype' : 'all',
-    'filekind' : 'all',
-    'suffix' : 'all',
+    'filetype' : 'xxx',
+    'filekind' : 'xxx',
+    'suffix' : 'xxx',
     'text_descr' : 'All NIRSPEC reference file types.',
-    'ld_tpn': 'nirspec_all.tpn',
-    'tpn': 'nirspec_all.tpn',
+    'ld_tpn': 'nirspec_xxx.tpn',
+    'tpn': 'nirspec_xxx.tpn',
 }

@@ -1,9 +1,9 @@
 {
     'instrument' : 'miri',
-    'filekind' : 'all',
-    'filetype' : 'all',
-    'suffix' : 'all',
+    'filekind' : 'xxx',
+    'filetype' : 'xxx',
+    'suffix' : 'xxx',
     'text_descr' : 'All MIRI reference file types.',
-    'ld_tpn': 'miri_all.tpn',
-    'tpn': 'miri_all.tpn',
+    'ld_tpn': 'miri_xxx.tpn',
+    'tpn': 'miri_xxx.tpn',
 }
