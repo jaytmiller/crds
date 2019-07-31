@@ -25,6 +25,7 @@ __all__ = [
     "locate_mapping",
     "locate_file",
     "get_default_context",
+    "configure",
     ]
 
 # ============================================================================
@@ -32,7 +33,7 @@ __all__ = [
 from .core import config   # module
 
 from .core.rmap import get_cached_mapping, asmapping
-from .core.config import locate_mapping, locate_file
+from .core.config import locate_mapping, locate_file, configure
 
 from .core import exceptions
 from .core.exceptions import *

@@ -1485,6 +1485,62 @@ def simplify_version(version):
 
 # -------------------------------------------------------------------------------------
 
+def crds_config(observatory="jwst", usecase="ops",
+        cache="/grp/crds/cache", mode="local", verbosity=0,
+        server_domain=".stsci.edu"):
+    from crds import utils
+    from crds.client import api
+    if server_domain == "serverless":
+        url = "https://" + observatory + "-serverless-mode"
+    else:
+        url = "https://" + observatory + "-crds" 
+        if usecase != "ops":
+            url += "-" + usecase
+        url += server_domain
+    os.environ["CRDS_SERVER_URL"] = url
+    api.set_crds_server(url)
+    os.environ["CRDS_PATH"] = cache
+    CRDS_MODE.set(mode)
+    log.set_verbose(verbosity)
+    utils.clear_function_caches()
+    return (url, cache, mode, verbosity)
+
+CRDS_PRESET = StrConfigItem(
+    "CRDS_PRESET", default="jwst-stsci",
+    comment="Easy setup for common CRDS configurations.",
+)
+
+PRESETS = {
+    "jwst" : dict(observatory="jwst"),
+    "hst" : dict(observatory="hst"),
+    "wfirst" : dict(observatory="wfirst"),
+
+    "ops" : dict(usecase="ops"),
+    "test" : dict(usecase="test", cache="crds_cache_test"),
+    "dev" : dict(usecase="dev", cache="crds_cache_dev"),
+
+    "local" : dict(mode="local"),
+    "remote" : dict(mode="remote"),
+
+    "verbose" : dict(verbosity=50),
+    "quiet" : dict(verbosity=-1),
+
+    "stsci" : dict(cache="/grp/crds/cache", mode="local", server_domain="serverless"),
+    "offsite" : dict(cache="crds_cache", mode="local"),
+    "aws" : dict(cache="crds_cache", mode="remote"),
+
+    "serverless" : dict(server_domain="serverless", mode="local"),
+    }
+
+def configure(preset="jwst-stsci"):
+    CRDS_PRESET.set(preset)
+    settings = {}
+    for setting in preset.split("-"):
+        settings.update(PRESETS[setting])
+    return crds_config(**settings)
+
+# -------------------------------------------------------------------------------------
+
 def test():
     """Run doctests on crds.config module."""
     import doctest
