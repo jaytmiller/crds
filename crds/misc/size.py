@@ -1,26 +1,17 @@
 """This module computes CRDS cache size as a function of time."""
 import sys
-import os
-import os.path
-import re
-import shutil
-import glob
 import datetime
 
 # ============================================================================
 
 import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-import matplotlib.cbook as cbook
 import pylab
 import scipy.stats
 
 # ============================================================================
 
-import crds
-from crds.core import log, config, utils, cmdline, timestamp
-from crds.core.log import srepr
+from crds.core import log, utils, cmdline, timestamp
 from crds.client import api
 
 # ============================================================================
@@ -31,7 +22,6 @@ def get_info_map(observatory):
         observatory, fields=["size","delivery_date"])
     
 class SizeScript(cmdline.ContextsScript):
-    """Command line script for synchronizing local CRDS file cache with CRDS server."""
 
     description = """
     Computes CRDS cache size as a function of the specified contexts.
@@ -40,39 +30,40 @@ class SizeScript(cmdline.ContextsScript):
     epilog = """    
     """
     
-    def add_args(self):    
-
-        super(SizeScript, self).add_args()
-    
     def main(self):
-        """Compute growth of specified contexts."""
+        """Compute size of specified contexts."""
 
         files = self.get_context_mappings() + self.get_context_references()
 
         infos = get_info_map(self.observatory)
 
-        sum = 0
+        total_size = 0
         for file in files:
-            sum += int(infos[file]["size"])
+            total_size += int(infos[file]["size"])
 
         first, last = self.contexts[0], self.contexts[-1]
         first_date = infos[first]["delivery_date"].split()[0]
         last_date = infos[last]["delivery_date"].split()[0]
-        size = utils.human_format_number(sum)
+        size = utils.human_format_number(total_size)
         
         log.info(first, last, first_date, last_date, len(files), size)
 
-        return (last_date, sum)
+        return (last_date, total_size)
 
 
 class PlotSizeScript(cmdline.Script):
-    """Command line script for synchronizing local CRDS file cache with CRDS server."""
 
     description = """
-    Computes CRDS cache size as a function of the specified contexts.
+    Trends CRDS cache growth and size as a function of specified start, end dates
+    and days increment.   Plot size points and regression line.
     """
     
-    epilog = """    
+    epilog = """
+    Run it something like this:
+
+    $ source envs/jwst-crds-ops.sh
+    $ crds sync --all
+    $  crds misc.size --increment=90 --plot-file=jwst_sizes.png
     """
     
     def add_args(self):    
@@ -102,8 +93,8 @@ class PlotSizeScript(cmdline.Script):
         while current < end:
 
             current_str = timestamp.format_date(current).split()[0]
-            s = SizeScript(f"crds.misc.size --up-to-context {current_str}")
-            results.append(s())
+            script = SizeScript(f"crds.misc.size --up-to-context {current_str}")
+            results.append(script())
             current += increment
 
         self.plot(results)
@@ -120,7 +111,7 @@ class PlotSizeScript(cmdline.Script):
         rslope, rintercept = regression[0], regression[1]
         
         pylab.suptitle(f"CRDS Cache Growth for "
-                    f"{self.observatory.upper()}")
+                       f"{self.observatory.upper()}")
         pylab.title(f"{utils.human_format_number(rslope*7)} bytes/week")
         pylab.xlabel("Date")
         pylab.ylabel("Bytes")
@@ -139,9 +130,9 @@ class PlotSizeScript(cmdline.Script):
         Standard error of the estimate
         """
         
-        x = np.linspace(dates[0], dates[-1], 1000)
-        y = list(map(lambda x: rslope*x + rintercept, x))
-        pylab.plot(x, y, "-r")
+        date = np.linspace(dates[0], dates[-1], 1000)
+        size = list(map(lambda x: rslope*x + rintercept, date))
+        pylab.plot(date, size, "-r")
         
         pylab.savefig(self.args.plot_file)
         pylab.show()
