@@ -25,6 +25,11 @@ from crds.client import api
 
 # ============================================================================
 
+@utils.cached
+def get_info_map(observatory):
+    return api.get_file_info_map(
+        observatory, fields=["size","delivery_date"])
+    
 class SizeScript(cmdline.ContextsScript):
     """Command line script for synchronizing local CRDS file cache with CRDS server."""
 
@@ -35,8 +40,6 @@ class SizeScript(cmdline.ContextsScript):
     epilog = """    
     """
     
-    # ------------------------------------------------------------------------------------------
-    
     def add_args(self):    
 
         super(SizeScript, self).add_args()
@@ -46,7 +49,7 @@ class SizeScript(cmdline.ContextsScript):
 
         files = self.get_context_mappings() + self.get_context_references()
 
-        infos = api.get_file_info_map(self.observatory, files)
+        infos = get_info_map(self.observatory)
 
         sum = 0
         for file in files:
@@ -57,7 +60,7 @@ class SizeScript(cmdline.ContextsScript):
         last_date = infos[last]["delivery_date"].split()[0]
         size = utils.human_format_number(sum)
         
-        print (first, last, first_date, last_date, len(files), size)
+        log.info(first, last, first_date, last_date, len(files), size)
 
         return (last_date, sum)
 
@@ -71,8 +74,6 @@ class PlotSizeScript(cmdline.Script):
     
     epilog = """    
     """
-    
-    # ------------------------------------------------------------------------------------------
     
     def add_args(self):    
 
@@ -109,18 +110,38 @@ class PlotSizeScript(cmdline.Script):
 
     def plot(self, results):
 
+        log.info(results)
+
         sizes = [r[1] for r in results]
         dates = mdates.date2num(
             [timestamp.parse_date(r[0]) for r in results])
 
-        regression = scipy.stats.linregress(dates, sizes) #x and y are arrays or lists.
-
-        pylab.title(f"CRDS Cache Growth for "
+        regression = scipy.stats.linregress(dates, sizes)
+        rslope, rintercept = regression[0], regression[1]
+        
+        pylab.suptitle(f"CRDS Cache Growth for "
                     f"{self.observatory.upper()}")
-        pylab.suptitle(f"with slope {regression[0]}")
+        pylab.title(f"{utils.human_format_number(rslope*7)} bytes/week")
         pylab.xlabel("Date")
         pylab.ylabel("Bytes")
-        pylab.plot_date(dates, sizes)
+        pylab.plot_date(dates, sizes, "ob")
+
+        """
+        slope : float
+        slope of the regression line
+        intercept : float
+        intercept of the regression line
+        r-value : float
+        correlation coefficient
+        p-value : float
+        two-sided p-value for a hypothesis test whose null hypothesis is that the slope is zero
+        stderr : float
+        Standard error of the estimate
+        """
+        
+        x = np.linspace(dates[0], dates[-1], 1000)
+        y = list(map(lambda x: rslope*x + rintercept, x))
+        pylab.plot(x, y, "-r")
         
         pylab.savefig(self.args.plot_file)
         pylab.show()
