@@ -6,7 +6,7 @@ import sys
 
 import difflib
 from itertools import product
-import numpy as np
+# import numpy as np
 
 # ==========================================================================
 
@@ -175,6 +175,8 @@ def report_mode_diff(diff):
 
     """
 
+    import numpy as np
+
     # Check edge case where no changes exist.
     result = ''
     if diff:
@@ -259,8 +261,9 @@ def sm_filter_opcodes(sm_opcodes, code='equal'):
     # do the filtering
     return list(filter(condition, sm_opcodes))
 
-
-@np.vectorize
+# Commented out np.vectorize since it requires np at compile time
+# adding a heavy weight dependency.   Keep interface,  but slower.
+# @np.vectorize
 def selected(element, wanted):
     """Determine whether an element is in a sequence or set
 
@@ -282,7 +285,6 @@ def selected(element, wanted):
     """
 
     return element in wanted
-
 
 # ==========================================================================
 class RowDiff:
@@ -348,6 +350,9 @@ class RowDiff:
         self.mode_fields = mode_fields
         self.summary_only = False
         self.consistent = False
+
+        import numpy as np
+        self.np = np
 
         # Check that fields and ignore_fields are not both
         # specified.
@@ -472,7 +477,7 @@ class RowDiff:
         values_combinations = list(product(*values_possible))
 
         # Create a table of the combinations
-        vc_array = np.array(values_combinations,
+        vc_array = self.np.array(values_combinations,
                             dtype=a_table_modes.dtype)
         vc_table = Table(vc_array)
 
@@ -541,11 +546,11 @@ class RowDiff:
                 # If values for the modes were defined, then select
                 # only those rows.
                 if isinstance(self.mode_fields, dict):
-                    selected_rows = np.array([True for index in
+                    selected_rows = self.np.array([True for index in
                                               range(len(a_table_values))])
                     for (field, values) in dict.items(self.mode_fields):
                         if values:
-                            selected_rows = np.logical_and(selected_rows,
+                            selected_rows = self.np.logical_and(selected_rows,
                                                            selected(a_table_values[field], values))
 
                     a_table_values = a_table_values[selected_rows]

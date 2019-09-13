@@ -6,7 +6,7 @@ readonly row acess to each segment.
 
 import os.path
 
-from astropy import table
+# from astropy import table
 
 from crds.core import utils, log
 from crds import data_file
@@ -63,6 +63,7 @@ class SimpleTable:
                 self.colnames = tuple(name.upper() for name in tab.columns.names)
                 self.rows = tuple(tuple(row) for row in tab)   # readonly
         else:
+            from astropy.io import table
             tab = table.Table.read(filename)
             self.colnames = tuple(name.upper() for name in tab.columns)
             self.rows = tuple(tuple(row) for row in tab)   # readonly

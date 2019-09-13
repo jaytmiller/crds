@@ -12,9 +12,9 @@ import uuid
 import os
 import io
 
-from astropy.io import fits
+# from astropy.io import fits
 
-import numpy as np
+# import numpy as np
 
 # ============================================================================
 
@@ -42,18 +42,14 @@ def fits_open(filename, **keys):
     CRDS_FITS_VERIFY_CHECKSUM is used to enable/disable default checksum verification.
     CRDS_FITS_IGNORE_MISSING_END is used to enable/disable the missing FITS END check.
     """
+    from astropy.io import fits
     keys = dict(keys)
     if "checksum" not in keys:
         keys["checksum"] = bool(config.FITS_VERIFY_CHECKSUM)
     if "ignore_missing_end" not in keys:
         keys["ignore_missing_end"] = bool(config.FITS_IGNORE_MISSING_END)
-    handle = None
-    try:
-        handle = fits.open(filename, **keys)
+    with fits.open(filename, **keys) as handle:
         yield handle
-    finally:
-        if handle is not None:
-            handle.close()
 
 def get_fits_header_union(filepath, needed_keys=(), original_name=None, observatory=None, **keys):
     """Get the union of keywords from all header extensions of FITS
@@ -73,10 +69,17 @@ class FitsFile(AbstractFile):
 
     format = "FITS"
 
+    def __init__(self, *args, **keys):
+        super(FitsFile, self).__init__(*args, **keys)
+        import numpy as np
+        from astropy.io import fits
+        self._fits = fits
+        self._np = np
+
     def get_info(self):
         """Capture the output from the fits info() function."""
         s = io.StringIO()
-        fits.info(self.filepath, s)
+        self._fits.info(self.filepath, s)
         s.seek(0)
         info_string = "\n".join(s.read().splitlines()[1:])
         return info_string
@@ -206,7 +209,7 @@ class FitsFile(AbstractFile):
 
     def setval(self, key, value):
         """FITS version of setval() method."""
-        fits.setval(self.filepath, key, value=value)
+        self._fits.setval(self.filepath, key, value=value)
 
     @hijack_warnings
     def add_checksum(self):
@@ -214,8 +217,8 @@ class FitsFile(AbstractFile):
         output = "crds-" + str(uuid.uuid4()) + ".fits"
         with fits_open(self.filepath, do_not_scale_image_data=True) as hdus:
             for hdu in hdus:
-                data = hdu.data if hdu.data is not None else np.array([])
-                fits.append(output, data, hdu.header, checksum=True)
+                data = hdu.data if hdu.data is not None else self._np.array([])
+                self._fits.append(output, data, hdu.header, checksum=True)
         os.remove(self.filepath)
         os.rename(output, self.filepath)
 
@@ -227,15 +230,15 @@ class FitsFile(AbstractFile):
             for hdu in hdus:
                 hdu.header.pop("CHECKSUM",None)
                 hdu.header.pop("DATASUM", None)
-                data = hdu.data if hdu.data is not None else np.array([])
-                fits.append(output, data, hdu.header, checksum=False)
+                data = hdu.data if hdu.data is not None else self._np.array([])
+                self._fits.append(output, data, hdu.header, checksum=False)
         os.remove(self.filepath)
         os.rename(output, self.filepath)
 
     @hijack_warnings
     def verify_checksum(self):
         """Verify checksums in `filepath`."""
-        with fits.open(self.filepath, do_not_scale_image_data=True, checksum=True) as hdus:
+        with self._fits.open(self.filepath, do_not_scale_image_data=True, checksum=True) as hdus:
             for hdu in hdus:
                 hdu.verify("warn")
 

@@ -9,7 +9,7 @@ from collections import defaultdict
 import gc
 import uuid
 
-import numpy as np
+# import numpy as np
 
 # ============================================================================
 
@@ -60,6 +60,8 @@ class Certifier:
 
         self.provenance_keys = list(provenance_keys or utils.get_observatory_package(self.observatory).PROVENANCE_KEYWORDS)
 
+        import numpy as np
+        self._np = np
 
     @property
     def basename(self):
@@ -462,7 +464,7 @@ class ReferenceCertifier(Certifier):
                 different += 1
             old_value = handle_nan(old_value)
             new_value = handle_nan(new_value)
-            if np.any(old_value != new_value):
+            if self._np.any(old_value != new_value):
                 different += 1
         return different
 
@@ -520,6 +522,7 @@ def table_mode_dictionary(generic_name, tab, mode_keys):
 
 def handle_nan(var):
     """Map nan values to 'nan' so that 'nan' == 'nan'."""
+    import numpy as np
     if isinstance(var, (np.float32, np.float64, np.float128)) and np.isnan(var):
         return 'nan'
     elif isinstance(var, np.ndarray) and var.shape == () and np.any(np.isnan(var)):

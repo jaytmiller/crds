@@ -9,7 +9,7 @@ import os
 
 # ============================================================================
 
-from astropy.io import fits as pyfits
+# from astropy.io import fits as pyfits
 
 # ============================================================================
 
@@ -70,7 +70,8 @@ def get_observatory(filepath, original_name=None):
             return observatory
     if original_name.endswith(".fits"):
         try:
-            observatory = pyfits.getval(filepath, keyword="TELESCOP")
+            from astropy.io import fits
+            observatory = fits.getval(filepath, keyword="TELESCOP")
         except KeyError:
             observatory = "hst"
         return observatory.lower()
