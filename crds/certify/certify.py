@@ -60,9 +60,6 @@ class Certifier:
 
         self.provenance_keys = list(provenance_keys or utils.get_observatory_package(self.observatory).PROVENANCE_KEYWORDS)
 
-        import numpy as np
-        self._np = np
-
     @property
     def basename(self):
         """Return the basename of the file being certified by this Certifier."""
@@ -455,6 +452,7 @@ class ReferenceCertifier(Certifier):
 
         Return 0 if old_row == new_row,  non-0 otherwise.
         """
+        import numpy as np
         different = 0
         for field_no, (old_key, old_value) in enumerate(old_row):
             new_key, new_value = new_row[field_no]
@@ -464,7 +462,7 @@ class ReferenceCertifier(Certifier):
                 different += 1
             old_value = handle_nan(old_value)
             new_value = handle_nan(new_value)
-            if self._np.any(old_value != new_value):
+            if np.any(old_value != new_value):
                 different += 1
         return different
 

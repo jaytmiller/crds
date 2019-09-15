@@ -351,9 +351,6 @@ class RowDiff:
         self.summary_only = False
         self.consistent = False
 
-        import numpy as np
-        self.np = np
-
         # Check that fields and ignore_fields are not both
         # specified.
         if self.fields and self.ignore_fields:
@@ -477,7 +474,8 @@ class RowDiff:
         values_combinations = list(product(*values_possible))
 
         # Create a table of the combinations
-        vc_array = self.np.array(values_combinations,
+        import numpy as np
+        vc_array = np.array(values_combinations,
                             dtype=a_table_modes.dtype)
         vc_table = Table(vc_array)
 
@@ -546,11 +544,11 @@ class RowDiff:
                 # If values for the modes were defined, then select
                 # only those rows.
                 if isinstance(self.mode_fields, dict):
-                    selected_rows = self.np.array([True for index in
+                    selected_rows = np.array([True for index in
                                               range(len(a_table_values))])
                     for (field, values) in dict.items(self.mode_fields):
                         if values:
-                            selected_rows = self.np.logical_and(selected_rows,
+                            selected_rows = np.logical_and(selected_rows,
                                                            selected(a_table_values[field], values))
 
                     a_table_values = a_table_values[selected_rows]

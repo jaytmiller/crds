@@ -69,17 +69,11 @@ class FitsFile(AbstractFile):
 
     format = "FITS"
 
-    def __init__(self, *args, **keys):
-        super(FitsFile, self).__init__(*args, **keys)
-        import numpy as np
-        from astropy.io import fits
-        self._fits = fits
-        self._np = np
-
     def get_info(self):
         """Capture the output from the fits info() function."""
         s = io.StringIO()
-        self._fits.info(self.filepath, s)
+        from astropy.io import fits
+        fits.info(self.filepath, s)
         s.seek(0)
         info_string = "\n".join(s.read().splitlines()[1:])
         return info_string
@@ -209,36 +203,42 @@ class FitsFile(AbstractFile):
 
     def setval(self, key, value):
         """FITS version of setval() method."""
-        self._fits.setval(self.filepath, key, value=value)
+        from astropy.io import fits
+        fits.setval(self.filepath, key, value=value)
 
     @hijack_warnings
     def add_checksum(self):
         """Add checksums to `filepath`."""
+        import numpy as np
+        from astropy.io import fits
         output = "crds-" + str(uuid.uuid4()) + ".fits"
         with fits_open(self.filepath, do_not_scale_image_data=True) as hdus:
             for hdu in hdus:
-                data = hdu.data if hdu.data is not None else self._np.array([])
-                self._fits.append(output, data, hdu.header, checksum=True)
+                data = hdu.data if hdu.data is not None else np.array([])
+                fits.append(output, data, hdu.header, checksum=True)
         os.remove(self.filepath)
         os.rename(output, self.filepath)
 
     @hijack_warnings
     def remove_checksum(self):
         """Remove checksums from `filepath`."""
+        import numpy as np
+        from astropy.io import fits
         output = "crds-" + str(uuid.uuid4()) + ".fits"
         with fits_open(self.filepath, checksum=False, do_not_scale_image_data=True) as hdus:
             for hdu in hdus:
                 hdu.header.pop("CHECKSUM",None)
                 hdu.header.pop("DATASUM", None)
-                data = hdu.data if hdu.data is not None else self._np.array([])
-                self._fits.append(output, data, hdu.header, checksum=False)
+                data = hdu.data if hdu.data is not None else np.array([])
+                fits.append(output, data, hdu.header, checksum=False)
         os.remove(self.filepath)
         os.rename(output, self.filepath)
 
     @hijack_warnings
     def verify_checksum(self):
         """Verify checksums in `filepath`."""
-        with self._fits.open(self.filepath, do_not_scale_image_data=True, checksum=True) as hdus:
+        from astropy.io import fits
+        with fits.open(self.filepath, do_not_scale_image_data=True, checksum=True) as hdus:
             for hdu in hdus:
                 hdu.verify("warn")
 

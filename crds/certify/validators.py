@@ -68,9 +68,6 @@ class Validator:
         if not hasattr(self.__class__, "_values"):
             self._values = self.condition_values(info.values)
 
-        import numpy as np
-        self._np = np
-
     @property
     def _eval_namespace(self):
         """Namespace in which various validator expressions and conditions are evaluated."""
@@ -386,13 +383,14 @@ class FloatValidator(NumericalValidator):
     type_name = "Float"
 
     def _check_value(self, filename, value):
+        import numpy as np
         try:
             NumericalValidator._check_value(self, filename, value)
         except ValueError as exc:   # not a range or exact match,  handle fp fuzz
             if self.is_range: # XXX bug: boundary values don't handle fuzz
                 raise
             for possible in self._values:
-                if self._np.allclose(value, possible, self.epsilon):
+                if np.allclose(value, possible, self.epsilon):
                     self.verbose(filename, value, "is within +-",
                                  repr(self.epsilon), "of", repr(possible))
                     return
@@ -658,11 +656,12 @@ class KernelunityValidator(Validator):
         with respect to the given `header`.  Read `header` from `filename` if `header` is None.
         """
         # super(KernelunityValidator, self).check_header(filename, header)
+        import numpy as np
         array_name = self.complex_name
         all_data = header[array_name].DATA.transpose()
-        images = int(self._np.product(all_data.shape[:-2]))
+        images = int(np.product(all_data.shape[:-2]))
         images_shape = (images,) + all_data.shape[-2:]
-        images_data = self._np.reshape(all_data, images_shape)
+        images_data = np.reshape(all_data, images_shape)
         log.verbose("File=" + repr(os.path.basename(filename)),
                    "Checking", len(images_data), repr(array_name), "kernel(s) of size",
                     images_data[0].shape, "for individual sums of 1+-1e-6.   Center pixels >= 1.")
@@ -670,7 +669,7 @@ class KernelunityValidator(Validator):
         center_0 = images_data.shape[-2]//2
         center_1 = images_data.shape[-1]//2
         center_pixels = images_data[..., center_0, center_1]
-        if not self._np.all(center_pixels >= 1.0):
+        if not np.all(center_pixels >= 1.0):
             log.warning("Possible bad IPC Kernel:  One or more kernel center pixel value(s) too small, should be >= 1.0")
             # raise BadKernelCenterPixelTooSmall(
             #    "One or more kernel center pixel value(s) too small,  should be >= 1.0")
