@@ -25,14 +25,13 @@ install:
     - source ci-helpers/travis/setup_conda_$TRAVIS_OS_NAME.sh
     - pip install git+https://github.com/spacetelescope/jwst
     - pip uninstall --yes crds
-    - ./install
     - pip install .["submission","test","docs"]
     - pip freeze
     - ./setup_test_cache $CRDS_TEST_ROOT
-
-script:
     - conda info
     - pip freeze
+
+script:
     - ./runtests --cover
 
 # after_success:
