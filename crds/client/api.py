@@ -56,6 +56,7 @@ __all__ = [
     "dump_references",
     "dump_mappings",
     "dump_files",
+    "download",
 
     "get_best_references",
     "cache_best_references",
@@ -583,6 +584,7 @@ class FileCacher:
         downloads = []
         for name in names:
             localpath = self.locate(name)
+            name = os.path.basename(name)
             if name.lower() in ["n/a", "undefined"]:
                 continue
             if not os.path.exists(localpath):
@@ -590,7 +592,6 @@ class FileCacher:
             elif self.ignore_cache:
                 utils.remove(localpath, observatory=self.observatory)
                 downloads.append(name)
-                utils.remove(localpath, observatory=self.observatory)
             localpaths[name] = localpath
         if downloads:
             n_bytes = self.download_files(downloads, localpaths)
@@ -806,7 +807,8 @@ def dump_references(*args, **keys):
     """
     return dump_references3(*args, **keys)[0]
 
-def dump_files(pipeline_context=None, files=None, ignore_cache=False, raise_exceptions=True):
+def dump_files(pipeline_context=None, files=None, ignore_cache=False, raise_exceptions=True,
+               conditioner=os.path.basename):
     """Unified interface to dump any file in `files`, mapping or reference.
 
     Returns localpaths,  downloads count,  bytes downloaded
@@ -815,8 +817,8 @@ def dump_files(pipeline_context=None, files=None, ignore_cache=False, raise_exce
         pipeline_context = get_default_context()
     if files is None:
         files = get_mapping_names(pipeline_context)
-    mappings = [ os.path.basename(name) for name in files if config.is_mapping(name) ]
-    references = [ os.path.basename(name) for name in files if not config.is_mapping(name) ]
+    mappings = [ conditioner(name) for name in files if config.is_mapping(name) ]
+    references = [ conditioner(name) for name in files if not config.is_mapping(name) ]
     if mappings:
         m_paths, m_downloads, m_bytes = dump_mappings3(
             pipeline_context, mappings=mappings, ignore_cache=ignore_cache, raise_exceptions=raise_exceptions)
@@ -828,6 +830,35 @@ def dump_files(pipeline_context=None, files=None, ignore_cache=False, raise_exce
     else:
         r_paths, r_downloads, r_bytes = {}, 0, 0
     return dict(list(m_paths.items())+list(r_paths.items())), m_downloads + r_downloads, m_bytes + r_bytes
+
+def download(files, output_dir=None, ignore_existing=False, raise_exceptions=True):
+    """Given a list of filenames or filepaths `files`, download them from
+    the configured CRDS file source.   If `files` is a string,  it should
+    name a single file to download.
+
+    If `output_dir` is not None, download to that directory.
+    Otherwise, if a filename has a path, download there.  If neither
+    is true, download the file to its location in the CRDS cache.
+
+    If `raise_exceptions` is False, issue a CRDS ERROR message and
+    continue when some exceptions occur.
+
+    If `ignore_existing` is True, overwrite files already at the
+    download paths.  Otherwise skip the download if a file already
+    exists at the download path.
+
+    Returns a list of download paths for `files`.
+
+    """
+    if isinstance(files, str):
+        files = [files]
+    if output_dir is not None:
+        files = [ os.path.join(output_dir, os.path.basename(filename)) 
+                  for filename in files ]
+    results = dump_files(
+        pipeline_context=None, files=files, raise_exceptions=raise_exceptions, 
+        ignore_cache=ignore_existing, conditioner=lambda x: x)
+    return list(results[0].values())
 
 # =====================================================================================================
 
