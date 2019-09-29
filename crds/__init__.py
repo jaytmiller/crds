@@ -17,6 +17,7 @@ __all__ = [
     "getrecommendations",
     "getreferences",
     "assign_bestrefs",
+    "download",
     "get_pickled_mapping",
     "get_symbolic_mapping",
     "get_cached_mapping",
@@ -43,7 +44,7 @@ from .core.heavy_client import get_symbolic_mapping, get_pickled_mapping
 from .core.heavy_client import get_context_name
 
 from crds.client import api
-from crds.client import get_default_context
+from crds.client import get_default_context, download
 
 from crds.bestrefs import assign_bestrefs
 
