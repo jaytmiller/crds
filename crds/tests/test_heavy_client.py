@@ -252,6 +252,19 @@ def dt_get_context_parkeys():
     >>> test_config.cleanup(old_state)
     """
 
+def dt_download_output_dir():
+    """
+    >>> old_state = test_config.setup()
+
+    >>> heavy_client.download("hst.pmap")
+    './hst.pmap'
+    >>> os.path.exists("./hst.pmap")
+    True
+    >>> os.remove("./hst.pmap")
+
+    >>> test_config.cleanup(old_state)
+    """
+
 # ==================================================================================
 
 # class TestHeavyClient(test_config.CRDSTestCase):

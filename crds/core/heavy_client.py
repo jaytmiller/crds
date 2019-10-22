@@ -73,6 +73,7 @@ __all__ = [
     "get_processing_mode", "get_context_name",
     "version_info",
     "get_bad_mappings_in_context", "list_mappings",
+    "download",
 ]
 
 # ============================================================================
@@ -738,3 +739,51 @@ def remove_pickled_mapping(mapping):
     with log.warn_on_exception("Failed removing pickle for", repr(mapping)):
         os.remove(pickle_file)
         log.info("Removed pickle for context", repr(pickle_file))
+
+# ============================================================================
+
+def download(files, output_dir=".", ignore_existing=False, raise_exceptions=True):
+    """Given a list of filenames or filepaths `files`, download them from
+    the configured CRDS file source.   If `files` is a string,  it should
+    name a single file to download.
+
+    Files are downloaded from the file source defined by `files` according to
+    the configuration settings (generally env vars) defined for CRDS.
+    Appropriately configured, the file source can include serverless downloads
+    defined by a CRDS cache hosted in AWS S3 storage.
+
+    If `output_dir` is 'crds://' download to the CRDS cache.
+
+    If `output_dir` is not None, download to that directory, defaulting to the
+    current working directory ".".
+
+    Otherwise, if a filename has a path, download to that path.
+
+    Otherwise, download to the current working directory ".".
+
+    If `raise_exceptions` is False, issue a CRDS ERROR message and
+    continue when some exceptions occur.
+
+    If `ignore_existing` is True, overwrite files already at the
+    download paths.  Otherwise skip the download if a file already
+    exists at the download path.
+
+    Returns a list of download paths for `files` if `files` is a list.
+
+    Returns a filepath if `files` is a single filepath string.
+    """
+    if isinstance(files, str):
+        files2 = [files]
+    if output_dir is not None:
+        if output_dir == "crds://":
+            files2 = [ os.path.basename(filename) for filename in files ]
+        else:
+            files2 = [ os.path.join(output_dir, os.path.basename(filename))
+                       for filename in files ]
+    else:
+        files2 = list(files)
+    results = api.dump_files(
+        pipeline_context=None, files=files2, raise_exceptions=raise_exceptions,
+        ignore_cache=ignore_existing, conditioner=lambda x: x)
+    filepaths = list(results[0].values())
+    return filepaths[0] if isinstance(files, str) else filepaths

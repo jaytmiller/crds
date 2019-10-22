@@ -41,10 +41,10 @@ from .core.constants import ALL_OBSERVATORIES, INSTRUMENT_KEYWORDS
 
 from .core.heavy_client import getreferences, getrecommendations
 from .core.heavy_client import get_symbolic_mapping, get_pickled_mapping
-from .core.heavy_client import get_context_name
+from .core.heavy_client import get_context_name, download
 
 from crds.client import api
-from crds.client import get_default_context, download
+from crds.client import get_default_context
 
 from crds.bestrefs import assign_bestrefs
 
