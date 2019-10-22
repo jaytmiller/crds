@@ -56,6 +56,7 @@ __all__ = [
     "dump_references",
     "dump_mappings",
     "dump_files",
+    "download",
 
     "get_best_references",
     "cache_best_references",
@@ -829,6 +830,35 @@ def dump_files(pipeline_context=None, files=None, ignore_cache=False, raise_exce
     else:
         r_paths, r_downloads, r_bytes = {}, 0, 0
     return dict(list(m_paths.items())+list(r_paths.items())), m_downloads + r_downloads, m_bytes + r_bytes
+
+def download(files, output_dir=None, ignore_existing=False, raise_exceptions=True):
+    """Given a list of filenames or filepaths `files`, download them from
+    the configured CRDS file source.   If `files` is a string,  it should
+    name a single file to download.
+
+    If `output_dir` is not None, download to that directory.
+    Otherwise, if a filename has a path, download there.  If neither
+    is true, download the file to its location in the CRDS cache.
+
+    If `raise_exceptions` is False, issue a CRDS ERROR message and
+    continue when some exceptions occur.
+
+    If `ignore_existing` is True, overwrite files already at the
+    download paths.  Otherwise skip the download if a file already
+    exists at the download path.
+
+    Returns a list of download paths for `files`.
+
+    """
+    if isinstance(files, str):
+        files = [files]
+    if output_dir is not None:
+        files = [ os.path.join(output_dir, os.path.basename(filename)) 
+                  for filename in files ]
+    results = dump_files(
+        pipeline_context=None, files=files, raise_exceptions=raise_exceptions, 
+        ignore_cache=ignore_existing, conditioner=lambda x: x)
+    return list(results[0].values())
 
 # =====================================================================================================
 
