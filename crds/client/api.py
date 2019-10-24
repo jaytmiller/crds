@@ -840,26 +840,36 @@ def cache_best_references(pipeline_context, header, ignore_cache=False, reftypes
     local_paths = cache_references(pipeline_context, best_refs, ignore_cache)
     return local_paths
 
-def cache_references(pipeline_context, bestrefs, ignore_cache=False):
+def cache_references(pipeline_context, bestrefs, ignore_cache=False, error_func=log.error):
     """Given a CRDS context `pipeline_context` and `bestrefs` dictionary, download missing
     reference files and cache them on the local file system.
 
-    bestrefs    { reference_keyword :  reference_basename }
+    pipeline_context   CRDS context used for bestrefs lookup
+
+    bestrefs        { reference_keyword :  reference_basename, ... }
+
+    ignore_cache    If True,  re-download files which are already cached.
+
+    error_func      Called for each fatal lookup error in bestrefs.  Defaults to log.error()
+                    An exception will be raised after all errors in bestrefs if this is
+                    called at least once.
 
     Returns:   { reference_keyword :  reference_local_filepath ... }
     """
-    wanted = _get_cache_filelist_and_report_errors(bestrefs)
+    wanted = _get_cache_filelist_and_report_errors(bestrefs, error_func)
 
     if config.S3_RETURN_URI:
         localrefs = {name: get_flex_uri(name) for name in wanted}
     else:
         localrefs = FileCacher(pipeline_context, ignore_cache, raise_exceptions=False).get_local_files(wanted)[0]
 
-    refs = _squash_unicode_in_bestrefs(bestrefs, localrefs)
+    refs = dict(bestrefs)
+    for filetype, refname in bestrefs.items():
+        refs[filetype] = localrefs.get(refname, bestrefs[filetype])
 
     return refs
 
-def _get_cache_filelist_and_report_errors(bestrefs):
+def _get_cache_filelist_and_report_errors(bestrefs, error_func):
     """Compute the list of files to download based on the `bestrefs` dictionary,
     skimming off and reporting errors, and raising an exception on the last error seen.
 
@@ -882,41 +892,19 @@ def _get_cache_filelist_and_report_errors(bestrefs):
                     last_error = CrdsLookupError(
                         "Error determining best reference for",
                         srepr(filetype), " = ", str(refname)[len("NOT FOUND"):])
-                    log.error(str(last_error))
+                    error_func(str(last_error))
             else:
                 log.verbose("Reference type", srepr(filetype), "defined as", srepr(refname))
                 wanted.append(refname)
         else:
             last_error = CrdsLookupError(
                 "Unhandled bestrefs return value type for", srepr(filetype))
-            log.error(str(last_error))
+            error_func(str(last_error))
     if last_error is not None:
         raise last_error
     return wanted
 
-def _squash_unicode_in_bestrefs(bestrefs, localrefs):
-    """Given bestrefs dictionariesy `bestrefs` and `localrefs`, make sure
-    there are no unicode strings anywhere in the keys or complex
-    values.
-    """
-    refs = {}
-    for filetype, refname in bestrefs.items():
-        if isinstance(refname, tuple):
-            refs[str(filetype)] = tuple([str(localrefs[name]) for name in refname])
-        elif isinstance(refname, dict):
-            refs[str(filetype)] = { name : str(localrefs[name]) for name in refname }
-        elif isinstance(refname, str):
-            if "NOT FOUND" in refname:
-                refs[str(filetype)] = str(refname)
-            else:
-                refs[str(filetype)] = str(localrefs[refname])
-        else:  # can't really get here.
-            raise CrdsLookupError(
-                "Unhandled bestrefs return value type for", srepr(filetype))
-    return refs
-
 # =====================================================================================================
-
 # These functions are deprecated and only work when the full CRDS library is installed,  and only for
 # some data file formats (.fits).
 

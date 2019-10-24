@@ -79,7 +79,7 @@ __all__ = [
 
 # !!!!! interface to jwst.stpipe.crds_client
 def getreferences(parameters, reftypes=None, context=None, ignore_cache=False,
-                  observatory="jwst", fast=False):
+                  observatory="jwst", fast=False, error_func=log.error):
     """
     This is the top-level get reference call for all of CRDS.  Based on
     `parameters`, getreferences() will download/cache the corresponding best
@@ -114,7 +114,13 @@ def getreferences(parameters, reftypes=None, context=None, ignore_cache=False,
 
       If fast is True, skip verbose output, parameter screening, implicit config update, and bad reference checking.
 
-    Returns { reftype : cached_bestref_path }
+    error_func      callable(string) with default log.error()
+
+      Called for each lookup error that precludes caching a reference file.
+      To suppress error messages,  set to lambda x: x or similar.
+      A final exception is still raised,  applies to true lookup errors only.
+
+    Returns { reftype : cached_bestref_path, ... }
 
       returns a mapping from types requested in `reftypes` to the path for each
       cached reference file.
@@ -124,8 +130,8 @@ def getreferences(parameters, reftypes=None, context=None, ignore_cache=False,
 
     # Attempt to cache the recommended references,  which unlike dump_mappings
     # should work without network access if files are already cached.
-    best_refs_paths = api.cache_references(
-        final_context, bestrefs, ignore_cache=ignore_cache)
+    best_refs_paths = api.cache_references(final_context, bestrefs, ignore_cache=ignore_cache,
+        error_func=error_func)
 
     return best_refs_paths
 
@@ -164,10 +170,9 @@ def getrecommendations(parameters, reftypes=None, context=None, ignore_cache=Fal
 
       If fast is True, skip verbose output, parameter screening, implicit config update, and bad reference checking.
 
-    Returns { reftype : bestref_basename }
+    Returns { reftype : bestref_basename, ... }
 
-      returns a mapping from types requested in `reftypes` to the path for each
-      cached reference file.
+      returns a mapping from types requested in `reftypes` to the basename of the reference file.
     """
     _final_context, bestrefs = _initial_recommendations("getrecommendations",
         parameters, reftypes, context, ignore_cache, observatory, fast)
