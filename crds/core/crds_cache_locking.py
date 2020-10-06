@@ -150,30 +150,6 @@ class CrdsFileLock(CrdsAbstractLock):
 
 # =========================================================================
 
-try:
-    import lockfile
-except ImportError:
-    lockfile = failed_module_proxy("lockfile")  # instantiating lock intentionally fails
-
-class CrdsLockFile(CrdsAbstractLock):
-    """Wrap lockfile.LockFile as locking basis.  self.lockname is path."""
-    def __init__(self, lockname):
-        super(CrdsLockFile, self).__init__(config.get_crds_lockpath(lockname))
-        self._lock = lockfile.LockFile(self.lockname)
-
-    def _break_lock(self,  *args, **keys):
-        """Destroy lock regardless of who owns it."""
-        try:
-            self._lock.break_lock(*args, **keys)
-        except Exception:
-            pass
-        try:
-            os.remove(self.lockname)
-        except Exception:
-            pass
-
-# =========================================================================
-
 LOCKS = {}   #  { lockpath : CrdsAbstractLockSubclass, ... }
 
 def get_lock(lockname):

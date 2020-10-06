@@ -20,17 +20,16 @@ from . import test_config
 
 # ===================================================================
 
-def multiprocessing_instance(output_file_name):
+def multiprocessing_instance(output_filename):
     """Pretend to do something generic."""
-    output_file = open(output_file_name, "a")
     with crds_cache_locking.get_cache_lock():
-        for char in "testing":
-            output_file.write(char)
-            output_file.flush()
-            time.sleep(0.2)
-        output_file.write("\n")
-        output_file.flush()
-
+        with open(output_filename, "a") as out_file:
+            for char in "testing":
+                out_file.write(char)
+                out_file.flush()
+                time.sleep(0.2)
+            out_file.write("\n")
+            out_file.flush()
 
 def try_multiprocessing():
     """Run some test functions using multiprocessing."""
@@ -65,6 +64,7 @@ def dt_multiprocessing_locking():
     Default locking configuration, enabled.
 
     >>> old_state = test_config.setup()
+    >>> _ = config.USE_LOCKING.set(True)
     >>> _ = config.LOCKING_MODE.set("multiprocessing")
     >>> crds_cache_locking.init_locks()
     >>> _ = log.set_verbose()
@@ -85,6 +85,7 @@ def dt_filelock_locking():
     Default locking configuration, enabled.
 
     >>> old_state = test_config.setup()
+    >>> _ = config.USE_LOCKING.set(True)
     >>> _ = config.LOCKING_MODE.set("filelock")
     >>> crds_cache_locking.init_locks()
     >>> _ = log.set_verbose()
@@ -107,6 +108,7 @@ def dt_lockfile_locking():
     Default locking configuration, enabled.
 
     >>> old_state = test_config.setup()
+    >>> _ = config.USE_LOCKING.set(True)
     >>> _ = config.LOCKING_MODE.set("lockfile")
     >>> crds_cache_locking.init_locks()
     >>> _ = log.set_verbose()

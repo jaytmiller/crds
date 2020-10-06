@@ -82,7 +82,7 @@ setup_pars = {
     "scripts" : glob.glob("scripts/*"),
     }
 
-TEST_DEPS = ["lockfile", "mock", "nose", "pytest", "pylint", "flake8", "bandit",]
+TEST_DEPS = ["mock", "nose", "pytest", "pylint", "flake8", "bandit",]
 
 SUBMISSION_DEPS = ["requests", "lxml", "parsley"]
 
