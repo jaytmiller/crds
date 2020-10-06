@@ -4,7 +4,7 @@ logic which may attempt to prefetch files for multiple images at the same time,
 often in a multiprocessing expansion running multiple associations concurrently.
 
 CRDS locking wraps more primitive locking functionality such as that provided by
-the lockfile package or the multiprocessing module.  In general locks should be
+the filelock package or the multiprocessing module.  In general locks should be
 assumed to be non-recursive and will deadlock if the owner attempts to acquire a
 second instance.
 
@@ -16,7 +16,6 @@ import multiprocessing
 
 # =========================================================================
 
-# import lockfile,  deferred
 # import filelock,  deferred
 
 # =========================================================================
@@ -166,7 +165,6 @@ def get_lock_class():
     classes = {
         "multiprocessing" : CrdsMultiprocessingLock,
         "filelock" : CrdsFileLock,
-        "lockfile" : CrdsLockFile,
     }
     return classes[config.LOCKING_MODE]
 

@@ -1024,7 +1024,7 @@ USE_LOCKING = BooleanConfigItem("CRDS_USE_LOCKING", True,
 
 LOCKING_MODE = StrConfigItem("CRDS_LOCKING_MODE",  "multiprocessing",
     "Form of locking used by CRDS cache.",
-    valid_values=["lockfile", "filelock", "multiprocessing"],
+    valid_values=["filelock", "multiprocessing"],
     lower=True)
 
 def get_crds_lockpath(lock_filename):

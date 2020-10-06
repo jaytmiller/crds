@@ -103,31 +103,6 @@ def dt_filelock_locking():
     >>> test_config.cleanup(old_state)
     """
 
-def dt_lockfile_locking():
-    """
-    Default locking configuration, enabled.
-
-    >>> old_state = test_config.setup()
-    >>> _ = config.USE_LOCKING.set(True)
-    >>> _ = config.LOCKING_MODE.set("lockfile")
-    >>> crds_cache_locking.init_locks()
-    >>> _ = log.set_verbose()
-    >>> crds_cache_locking.status()
-    'enabled, lockfile'
-    >>> crds_cache_locking.get_cache_lock()
-    CrdsLockFile('/tmp/crds.cache')
-
-    >> try_multiprocessing()    XXXXX lockfile is broken
-    testing
-    testing
-    testing
-    testing
-    testing
-    <BLANKLINE>
-
-    >>> test_config.cleanup(old_state)
-    """
-
 def dt_default_disabled():
     """
     Default locking configuration, disabled.   All bets are off
